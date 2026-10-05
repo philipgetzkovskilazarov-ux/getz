@@ -187,6 +187,64 @@ SC.dark=()=>{const c=new Cv(SW,SH);c.rect(0,0,SW,SH,(x,y)=>R('#0a0612',6)[CL(Mat
 SC.eye=()=>{const c=new Cv(SW,SH);c.rect(0,0,SW,SH,'#050206');glow(c,160,90,90,'#ff4a10',.5);
   c.ell(160,90,34,60,'#ffb020');c.ell(160,90,26,56,'#ff6a10');c.ell(160,90,6,52,'#050206');for(let i=0;i<40;i++)c.px(160+(HS(i,1,2)-.5)*80,HS(i,2,2)*SH,'#ff9a20',.6);
   return{cv:c.canvas(),lights:[{x:160,y:90,r:140,col:'#ff4a10',a:.6,flick:.4}],particles:{type:'ember',n:60,col:['#ff9a20','#ff5a10']}}};
+SC.lastAlliance=()=>{const c=new Cv(SW,SH);sky(c,[[0,'#120404'],[50,'#5a0e08'],[100,'#c8401a'],[140,'#ff9a30'],[200,'#ffd070']]);
+  /* ash clouds */
+  for(let i=0;i<9;i++)cloud(c,20+i*38,50+Math.sin(i)*14,60,12,'#3a1410',i+7);
+  /* Mount Doom */
+  const mt=new Cv(SW,SH);mt.poly([[40,200],[112,92],[128,60],[152,60],[168,92],[250,200]],(x,y)=>{const t=(y-60)/140,l=1.2+(U.noise(x*.08,y*.07,3)-.5)*2+(U.bayer(x,y)-.5)*.5+(x<150?.5:-.2);return R('#3a2220',6)[CL(Math.round(l+t*.4),0,5)]});
+  for(let k=0;k<6;k++){let x=140+k*2-5,y=62;for(let j=0;j<90;j++){x+=Math.sin(j*.25+k)*.8+(k-3)*.18;y+=1.1;mt.px(x,y,['#ff5a10','#ff9a20','#ffd040'][k%3],.9);mt.px(x+1,y,'#ff5a10',.5)}}
+  glow(mt,140,60,40,'#ff6a20',.35);
+  for(let i=0;i<60;i++){const x=150+U.hash(i,1,2)*70,y=14+U.hash(i,2,2)*50;mt.px(x+(60-y)*.3,y,'#8a5a4a',.35)}
+  const cv=c.canvas(),k=cv.getContext('2d');k.imageSmoothingEnabled=false;k.drawImage(mt.canvas(),0,0);
+  /* armies in silhouette */
+  const ar=new Cv(SW,SH);const sil=R('#0a0404',4);
+  for(let i=0;i<46;i++){const x=6+i*7+((i*13)%5),y=172+((i*7)%9),h=14+((i*11)%6);ar.rect(x,y-h,3,h,sil[1]);ar.px(x+1,y-h-1,sil[2]);ar.rect(x-1,y-h+3,5,2,sil[2]);ar.vline(x+(i%2?4:-2),y-h-14,h+14,sil[0]);ar.px(x+(i%2?4:-2),y-h-15,'#c0b8a8')}
+  for(let b=0;b<5;b++){const x=30+b*68;ar.vline(x,120,50,sil[0]);ar.poly([[x,120],[x+14,126],[x,134]],b%2?'#7a1a1a':'#2a3a7a')}
+  /* Sauron: towering armoured silhouette with a mace */
+  const sx=246,sy=178,dk='#0c0606';
+  ar.poly([[sx-20,sy-96],[sx-40,sy-34],[sx-8,sy-44]],R('#1a0a0a',4)[1]);                        // cape
+  ar.rect(sx-10,sy-44,8,44,dk);ar.rect(sx+2,sy-44,8,44,dk);ar.rect(sx-12,sy-6,11,6,dk);ar.rect(sx+2,sy-6,12,6,dk);   // legs + boots
+  ar.poly([[sx-20,sy-98],[sx+20,sy-98],[sx+15,sy-44],[sx-15,sy-44]],dk);                        // torso
+  ar.shade(sx-22,sy-94,10,8,R('#14080a',4),{dither:0});ar.shade(sx+22,sy-94,10,8,R('#14080a',4),{dither:0});     // pauldrons
+  for(let i=-1;i<=1;i++){ar.poly([[sx-22+i*7+14,sy-100],[sx-20+i*7+14,sy-112],[sx-18+i*7+14,sy-100]],dk);ar.poly([[sx+22+i*7-14,sy-100],[sx+24+i*7-14,sy-112],[sx+26+i*7-14,sy-100]],dk)}
+  ar.shade(sx,sy-108,8.5,10,R('#14080a',4),{dither:0});                                          // helm
+  for(let i=0;i<7;i++){const a2=-Math.PI+i*Math.PI/6+.2;ar.poly([[sx+Math.cos(a2)*8,sy-110+Math.sin(a2)*9],[sx+Math.cos(a2)*17,sy-110+Math.sin(a2)*20],[sx+Math.cos(a2+.18)*8,sy-110+Math.sin(a2+.18)*9]],dk)}
+  ar.line(sx+18,sy-88,sx+36,sy-120,dk);ar.line(sx+19,sy-88,sx+37,sy-120,dk);ar.line(sx+20,sy-88,sx+38,sy-120,dk);ar.line(sx+14,sy-80,sx+24,sy-58,dk);ar.line(sx-18,sy-84,sx-26,sy-60,dk);ar.line(sx-19,sy-84,sx-27,sy-60,dk);
+  ar.shade(sx+38,sy-124,7,7,R('#0c0606',4),{dither:0});for(let a2=0;a2<10;a2++)ar.line(sx+38,sy-124,sx+38+Math.cos(a2*.628)*12,sy-124+Math.sin(a2*.628)*12,dk);
+  ar.px(sx-3,sy-108,'#ffb020');ar.px(sx+3,sy-108,'#ffb020');ar.px(sx-4,sy-108,'#ff6a10',.6);ar.px(sx+4,sy-108,'#ff6a10',.6);
+  ar.outline(0,'#ff7a20');
+  k.drawImage(ar.canvas(),0,0);
+  /* Isildur and the shard, in the foreground light */
+  const is=new Cv(SW,SH);is.shade(70,164,5,9,R('#c8b080',5),{light:[-.4,-.7,.5]});is.shade(70,152,4,4,R('#e8c8a0',5),{dither:0});is.line(74,156,92,132,'#e8e8f0');is.line(75,156,93,132,'#9aa0b0');is.rect(66,158,4,12,'#4a2a1a');is.outline(.3);k.drawImage(is.canvas(),0,0);
+  return{cv,lights:[{x:140,y:60,r:110,col:'#ff7a20',a:.6,flick:.3},{x:244,y:90,r:60,col:'#ff4a10',a:.35,flick:.4}],particles:{type:'ember',n:60,col:['#ff9a20','#ff5a10','#ffd040']}}};
+SC.orthanc=()=>{const c=new Cv(SW,SH);sky(c,[[0,'#06080e'],[60,'#141c2c'],[130,'#2a2c38'],[200,'#3a2a2a']]);
+  for(let i=0;i<10;i++)cloud(c,16+i*34,36+(i%3)*18,70,14,'#3a4252',i+2);
+  ridge(c,140,10,.02,3,'#1a2028',{fog:'#4a3a3a',fade:50});
+  const t=new Cv(SW,SH),st=R('#1c1c26',6,.2);
+  /* Orthanc: black faceted spire with four horns */
+  t.poly([[132,170],[142,40],[150,18],[170,18],[178,40],[188,170]],(x,y)=>{const u=(x-132)/56,l=1.4+(.4-u)*1.5+(U.noise(x*.2,y*.05,3)-.5)*.8+(U.bayer(x,y)-.5)*.5+((x+y)%9===0?-.4:0);return st[CL(Math.round(l),0,5)]});
+  [[138,40],[148,22],[172,22],[182,40]].forEach(([x,y],i)=>{t.poly([[x-5,y+12],[x+(i<2?-9:9),y-14],[x+4,y+12]],st[2])});
+  t.rect(150,10,20,10,st[3]);t.px(160,8,'#ff9a30');
+  for(let k=0;k<5;k++){const y=60+k*20;t.rect(156,y,8,10,'#ff9a30',.8);t.rect(157,y+1,6,8,'#ffd070',.9)}
+  [[100,170],[220,170],[60,184],[260,184]].forEach(([x,y])=>{t.rect(x,y-8,22,8,'#ff5a10',.8);t.rect(x+2,y-12,18,4,'#ffa030',.7)});
+  const cv=c.canvas(),k=cv.getContext('2d');k.imageSmoothingEnabled=false;k.drawImage(t.canvas(),0,0);
+  const g=new Cv(SW,SH);ridge(g,176,6,.03,5,'#161218');k.drawImage(g.canvas(),0,0);
+  return{cv,lights:[{x:160,y:100,r:90,col:'#ff9a30',a:.45,flick:.2},{x:100,y:170,r:60,col:'#ff5a10',a:.4,flick:.4},{x:220,y:170,r:60,col:'#ff5a10',a:.4,flick:.4}],particles:{type:'rain',n:90,col:['#8aa0c8']},fog:'#3a3a48'}};
+SC.gollum=()=>{const c=new Cv(SW,SH);c.rect(0,0,SW,SH,(x,y)=>R('#14101a',6)[CL(Math.round(.8+(NS(x*.04,y*.05,3))*1.3+(U.bayer(x,y)-.5)*.5),0,5)]);
+  for(let i=0;i<24;i++){const x=U.hash(i,1,4)*SW;c.poly([[x,0],[x+10,0],[x+4,20+U.hash(i,2,4)*40]],R('#1c1822',4)[1])}
+  c.ell(160,150,70,16,R('#10101c',4)[1]);c.ell(160,148,60,12,(x,y,dx,dy)=>R('#2a5a6a',5)[CL(Math.round(1.3+Math.sin(dx*8+dy*4)*.5+(U.bayer(x,y)-.5)*.6),0,4)]);
+  glow(c,160,120,40,'#ffd060',.25);c.ell(160,118,4,4,'#ffd060');c.ell(160,118,2.4,2.4,'#fff6a0');
+  const cv=c.canvas();return{cv,lights:[{x:160,y:118,r:90,col:'#ffd060',a:.5,flick:.15}],particles:{type:'dust',n:20,col:['#ffe9a0']}}};
+SC.caradhras=()=>{const c=new Cv(SW,SH);sky(c,[[0,'#5a6a88'],[70,'#9aaac4'],[130,'#d4dce8'],[200,'#eef2f8']]);
+  for(let i=0;i<8;i++)cloud(c,10+i*44,40+(i%3)*14,70,14,'#e8eef8',i+11);
+  const m=new Cv(SW,SH);const peak=(cx,top,w,col)=>m.poly([[cx-w,200],[cx-w*.55,top+36],[cx-w*.12,top+8],[cx,top],[cx+w*.15,top+12],[cx+w*.6,top+44],[cx+w,200]],(x,y)=>{const t=(y-top)/(200-top),u=(x-(cx-w))/(2*w);const l=3.4-u*1.6+(U.noise(x*.07,y*.06,3)-.5)*1.8+(U.bayer(x,y)-.5)*.5-t*.6;return R(col,6,.22)[CL(Math.round(l),0,5)]});
+  peak(70,46,110,'#8a96ae');peak(230,34,120,'#7a88a2');peak(160,70,100,'#a4b0c4');
+  for(let i=0;i<260;i++){const x=U.hash(i,1,7)*SW,y=70+U.hash(i,2,7)*110;if(m.solid(x,y))m.px(x,y,'#ffffff',.5+U.hash(i,3,7)*.5)}
+  const cv=c.canvas(),k=cv.getContext('2d');k.imageSmoothingEnabled=false;k.drawImage(m.canvas(),0,0);
+  /* the company, a line of tiny figures wading through the drifts */
+  const f=new Cv(SW,SH);for(let i=0;i<9;i++){const x=40+i*18,y=170-i*3;f.rect(x,y-9,3,9,i<4?'#4a3a2a':'#2a2a38');f.px(x+1,y-10,'#d8b898');if(i===3){f.vline(x+3,y-14,14,'#7a5a3a')}f.hline(x-2,y+1,7,'#ffffff',.8)}k.drawImage(f.canvas(),0,0);
+  const g=new Cv(SW,SH);ridge(g,184,6,.04,3,'#e8eef8');k.drawImage(g.canvas(),0,0);
+  return{cv,lights:[],particles:{type:'snow',n:140,col:['#ffffff','#dfe8ff']},fog:'#ffffff'}};
 const SCACHE={};
 window.scene=name=>SCACHE[name]||(SCACHE[name]=(SC[name]||SC.dark)());
 window.SCENES=Object.keys(SC);window.SW=SW;window.SH=SH;

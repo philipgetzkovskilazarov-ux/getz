@@ -12,7 +12,7 @@ chain('rivWake',[
 D.rivWake_2.ch=[{t:'Where were you?',go:'rw_a'},{t:'I am only glad you are here.',go:'rw_b',fx:()=>bond('gandalf',1)}];
 D.rw_a={who:'gandalf',m:'sad',text:"I was a prisoner, Frodo. Locked at the top of Orthanc by Saruman the White, the wisest of my order — who has gone over to the Enemy, and covets the Ring for himself. A great eagle carried me out. I did not forget you for a moment.",next:'rw_end'};
 D.rw_b={who:'gandalf',m:'smile',text:"And I you. I would give a great deal to have been there. Saruman, the wisest of my order, has turned traitor, you see. I was his guest, rather against my will.",next:'rw_end'};
-D.rw_end={who:'gandalf',m:'stern',text:"Rest. Then wander and speak with the guests who are gathering. Elrond has called a *Council*. Bilbo is here, too — he is somewhere among the garden terraces, much older and just as stubborn.",fx:()=>{objective('Explore Rivendell. Speak with Bilbo, and meet the guests gathering for the Council.')}};
+D.rw_end={who:'gandalf',m:'stern',text:"Rest. Then wander and speak with the guests who are gathering. Elrond has called a *Council*. Bilbo is here, too — he is somewhere among the garden terraces, much older and just as stubborn.",fx:()=>{objective('Explore Rivendell. Speak with Bilbo, and meet the guests gathering for the Council.',{npc:'bilbo'})}};
 chain('rivHeal',[
  ['elrond','stern',"The wound is deep and cold. This is the work of a Morgul-blade; it seeks the heart. We have little time. Bring me the right herbs, Frodo — and your friends' trust.",{scene:'rivendell',name:'Elrond'}]]);
 D.rivHeal.next='rivHeal2';
@@ -22,7 +22,7 @@ D.healBad={who:'elrond',m:'worried',scene:'rivendell',text:"The draught was weak
 async function storyRivendell(){flag('rivArrived');chapter(4);setTime('day');flag('hasRing');
   await say('rivWake');
   if(G.stats.frodoHP<3){await say('rivHeal');const ok=await puzzle('athelas');await say(ok?'healOk':'healBad')}
-  objective('Explore Rivendell. Speak with Bilbo, and meet the guests gathering for the Council.');return null}
+  objective('Explore Rivendell. Speak with Bilbo, and meet the guests gathering for the Council.',{npc:'bilbo'});return null}
 async function rivGandalf(){
   if(F().councilDone)return'gandalfPostCouncil';
   if(F().councilReady)return'gandalfCouncilSoon';
@@ -30,7 +30,7 @@ async function rivGandalf(){
 D.gandalfMid={who:'gandalf',m:'smile',scene:'rivendell',text:()=>"Take your time, Frodo. Rivendell is the one place in the world where time slows to a stately walk. Speak with Bilbo, and with the strangers who have come to town. The Council begins when everyone is gathered. ("+(['metBilbo','metLegolas','metGimli','metBoromir'].filter(k=>F()[k]).length)+"/4)"};
 D.gandalfCouncilSoon={who:'gandalf',m:'stern',scene:'council',text:"Everyone is gathered. Go to the stone circle on the eastern terrace; Elrond is waiting."};
 D.gandalfPostCouncil={who:'gandalf',m:'smile',scene:'rivendell',text:"We leave when the Fellowship is ready. Bring warm cloaks, and as much hope as you can carry."};
-function checkCouncil(){if(['metBilbo','metLegolas','metGimli','metBoromir'].every(k=>F()[k])&&!F().councilReady){flag('councilReady');objective('Go to the stone circle on the eastern terrace for the Council of Elrond.');toast('The Council is ready to begin.')}}
+function checkCouncil(){if(['metBilbo','metLegolas','metGimli','metBoromir'].every(k=>F()[k])&&!F().councilReady){flag('councilReady');objective('Go to the stone circle on the eastern terrace for the Council of Elrond.',{x:46,y:23.4});toast('The Council is ready to begin.')}}
 chain('bil0',[
  ['bilbo','happy',"Frodo, my dear boy! *There* you are! I knew you would come, somehow. Look at me: grey as a badger and twice as grumpy. I have been writing a book. A *big* one.",{scene:'rivendell',side:'left'}],
  ['bilbo','smile',"Is that... is that the Ring? Forgive an old hobbit's curiosity. Might I just look at it? Only look?"]]);
@@ -54,6 +54,13 @@ D.elrond1={who:'elrond',m:'stern',scene:'rivendell',text:"The Ring-bearer, awake
 D.elrond2={who:'elrond',m:'sad',text:"It was made in the fires of Mount Doom; only there can it be unmade. Which means taking it into the very heart of Mordor. That is the burden — and I do not envy whoever bears it."};
 D.elrondAfter={who:'elrond',m:'smile',scene:'rivendell',text:"You have taken a heavy road, Frodo. My blessing and my best remedies go with you."};
 D.arwen1={who:'arwen',m:'smile',name:'Arwen',scene:'rivendell',text:"I am glad you are well, Frodo. The river answered when I called; I did only what the valley would do for any friend. Go with courage."};
+async function rivArwen(){if(F().councilDone&&!F().arwenScene){flag('arwenScene');await say('arwenAra');return null}return'arwen1'}
+chain('arwenAra',[
+ N('On a quiet bridge above the falls, the elf-lady and the Ranger stand a long moment in silence. Frodo, passing by, stops respectfully out of earshot.',{scene:'rivendell'}),
+ ['arwen','sad',"You will leave in the morning, and no one can promise that you will return. My father would have me sail West before the shadow comes. But I would sooner share one mortal life with you than all the ages of this world alone.",{scene:'rivendell',name:'Arwen'}],
+ ['aragorn','sad',"You have given me the best of reasons to live, Arwen. Whatever happens on the road, remember that I kept faith.",{scene:'rivendell',name:'Aragorn'}],
+ N('She puts a silver pendant, a star of white gems, into his hand and closes his fingers over it.',{scene:'rivendell'}),
+ ['arwen','smile',"Take it. Wear it, and think of the evening-star that never sets.",{scene:'rivendell',name:'Arwen',fx:()=>{bond('aragorn',1,'Aragorn is grateful');flag('hasEvenstar')}}]]);
 D.elfA={who:'legolas',m:'smile',name:'Elf',scene:'rivendell',text:"We sing about the sea in Rivendell, more than we should. It is a very long song, and none of us has finished it."};
 D.elfB={who:'elrond',m:'smile',name:'Elf',scene:'rivendell',text:"You are the little one who rode on Arwen's horse. All the valley has been talking of nothing else since."};
 D.elfC={who:'galadriel',m:'smile',name:'Elf',scene:'rivendell',text:"The leaves fall upward here, if you look at them the right way. Try it."};
@@ -112,7 +119,7 @@ D.cnVol7={who:'sam',m:'surprised',scene:'council',text:"Mr. Frodo's not going an
 D.cnVol8={who:'elrond',m:'smile',scene:'council',text:"No, indeed. It is hardly possible to separate you, even when he is summoned to a secret council and you are not.",next:'cnVol9'};
 D.cnVol9={who:'merry',m:'happy',scene:'council',text:"Here! We are coming too! You would have to send us home tied up in a sack to stop us.",next:'cnVol10'};
 D.cnVol10={who:'pippin',m:'happy',scene:'council',text:"Anyway, you need people of intelligence on this sort of mission... quest... thing.",next:'cnVol11'};
-D.cnVol11={who:'elrond',m:'smile',scene:'council',text:"Then that makes *ten*. Ten Walkers against the ten Black Riders. Let it be so. You shall be the *Fellowship of the Ring*.",fx:()=>{G.party=['sam','merry','pippin','gandalf','aragorn','legolas','gimli','boromir'];['gandalf','legolas','gimli','boromir'].forEach(k=>flag('hide_'+k));flag('fellowshipFormed');chapter(5);objective('The Fellowship departs. Leave Rivendell through the southern arch.')}};
+D.cnVol11={who:'elrond',m:'smile',scene:'council',text:"Then that makes *ten*. Ten Walkers against the ten Black Riders. Let it be so. You shall be the *Fellowship of the Ring*.",fx:()=>{G.party=['sam','merry','pippin','gandalf','aragorn','legolas','gimli','boromir'];['gandalf','legolas','gimli','boromir'].forEach(k=>flag('hide_'+k));flag('fellowshipFormed');chapter(5);objective('The Fellowship departs. Leave Rivendell through the southern arch.',{x:32,y:44,up:6})}};
 async function councilFinale(){G.sprite='frodoCloak';flag('hasCloak')}
 D.cnFin={who:'elrond',m:'smile',scene:'rivendell',text:"Wear these Elven cloaks, small ones; they will keep out the rain and the eyes of watchers. Go with my blessing. The Fellowship leaves at dawn.",next:'cnFin2'};
 D.cnFin2={who:'narrator',scene:'rivendell',text:"Frodo fastens the leaf-clasp of the Elven cloak. A silver brooch gleams in the light. Behind the Fellowship, the last homely house grows small. There will be no turning back."};
@@ -121,10 +128,25 @@ D.cnVol11.next='cnFin';
 
 /* ================= V · MORIA ================= */
 chain('mgArrive',[
- N('Weeks of travel. The pass over Caradhras closed against them: a wall of wind and snow, and a voice crying out of the storm. Gandalf, wearily, turns the Fellowship to the one path none of them wanted — beneath the mountain.',{scene:'moriaGate'}),
+ N('Cold, hungry and shaken, the Fellowship comes down off the mountain and travels by night to a still, black lake beneath sheer cliffs. Wolves howl somewhere behind them.',{scene:'moriaGate'}),
  ['gandalf','worried',"The West-gate of *Moria*. The Dwarf-road, once the proudest hall in Middle-earth. Do not be afraid; the Doors of Durin shall open for those who know how to ask.",{scene:'moriaGate'}],
  ['gimli','happy',"My cousin Balin has established a colony here. I hope there is *roast boar* and a very large mug of ale.",{scene:'moriaGate'}]]);
-async function storyMoriaGate(){flag('mgArrived');chapter(5);await say('mgArrive');objective('Open the Doors of Durin. Examine the door by the cliff.');
+chain('caradhras',[
+ N('The Fellowship sets out south from Rivendell, over hill and stone, until the great mountain Caradhras rises before them. They climb as the wind begins to rise.',{scene:'caradhras'}),
+ ['boromir','stern',"The snow is deepening. Frodo, take my cloak; the little ones will freeze before nightfall. Pippin, hold on to my belt.",{scene:'caradhras'}],
+ ['legolas','worried',"There is a voice upon the wind, a *dark voice*. Do you hear it? It is chanting, and it is not of this world.",{scene:'caradhras'}],
+ N('An avalanche of snow thunders from the peak above. Gandalf, braced against the wind, tries to shout down the storm — and the whole mountain answers with a roar of ice.',{scene:'caradhras'}),
+ ['aragorn','stern',"Saruman! He is bringing the mountain down upon us. Gandalf, we must turn back; we cannot cross here!",{scene:'caradhras',name:'Aragorn'}]]);
+D.caradhras_4.ch=[
+ {t:'Gandalf, take us through the Gap of Rohan instead.',go:'cr_a'},
+ {t:'We should follow Gandalf. He knows a way.',go:'cr_b',fx:()=>bond('gandalf',1)},
+ {t:'Boromir is right: we should go south to Gondor.',go:'cr_c',fx:()=>bond('boromir',1)}];
+D.cr_a={who:'gandalf',m:'stern',scene:'caradhras',fx:()=>bond('aragorn',1),text:"The Gap of Rohan runs near Isengard, Frodo. Straight into Saruman's hands. No. There is one road left, and it runs *under* the mountain. Through the Mines of Moria.",next:'cr_end'};
+D.cr_b={who:'gandalf',m:'sad',scene:'caradhras',text:"I wish I did. There is a way — and I do not like it. The Mines of Moria. We shall go beneath the mountain, if it is not already ruined.",next:'cr_end'};
+D.cr_c={who:'boromir',m:'stern',scene:'caradhras',text:"Gondor lies that way. Through Rohan, then down to my father's city. A well-guarded road. But Gandalf has other thoughts, I see.",next:'cr_d'};
+D.cr_d={who:'gandalf',m:'stern',scene:'caradhras',text:"Roads south pass near Isengard, Boromir. There is only one road open to us now: the Mines of Moria.",next:'cr_end'};
+D.cr_end={who:'gimli',m:'happy',scene:'caradhras',text:"Moria! Now *that* is a road I have wanted to walk since I was a lad. Hah! Come, you lot, my cousin Balin has been waiting for us."};
+async function storyMoriaGate(){flag('mgArrived');chapter(5);await say('caradhras');await say('mgArrive');objective('Open the Doors of Durin. Examine the door by the cliff.',{x:22,y:11.4,up:30});
   await say('mgPippin');return null}
 D.mgPippin={who:'pippin',m:'happy',scene:'moriaGate',text:"I say! Skipping stones on a lake — this will be the first moment of fun in a month. Merry, watch me.",ch:[
  {t:'Pippin, do not! Leave the water alone.',go:'mgP_a'},
@@ -140,8 +162,8 @@ D.mgDoor_1.ch=[{t:'Let me look at the door.',go:null}];
 async function moriaDoor(){
   if(!F().doorAsked){flag('doorAsked');await say('mgDoor')}
   const r=await puzzle('door',{hard:!!F().pippinThrew});
-  if(r.ok){bond('gandalf',r.tries===0?3:1,r.tries===0?'Gandalf: "Well spotted!"':'');flag('doorOpen');await say('mgOpen');sfx.door();objective('The Doors are open. Go in — quickly.')}
-  else{bond('gandalf',-1);flag('doorOpen');await say('mgFail');sfx.door();objective('The Doors are open. Go in — quickly.')}
+  if(r.ok){bond('gandalf',r.tries===0?3:1,r.tries===0?'Gandalf: "Well spotted!"':'');flag('doorOpen');await say('mgOpen');sfx.door();objective('The Doors are open. Go in — quickly.',{x:22,y:10,up:20})}
+  else{bond('gandalf',-1);flag('doorOpen');await say('mgFail');sfx.door();objective('The Doors are open. Go in — quickly.',{x:22,y:10,up:20})}
   return null}
 D.mgOpen={who:'frodo',m:'surprised',scene:'moriaGate',text:"*Mellon.* It means *friend*. The answer was written there all along — you only had to ask in the Elvish way.",next:'mgOpen2'};
 D.mgOpen2={who:'gandalf',m:'smile',scene:'moriaGate',text:()=>r_ok()?"Of course! The simplest answer is usually the right one. Well done, Frodo.":"Hm. Well. I might have got there eventually. The doors swing open at last.",next:'mgOpen3'};
@@ -186,7 +208,7 @@ chain('mhArrive',[
  N('Black. A damp, endless silence, the sound of dripping water... and then Gandalf\'s staff ignites with a pure white glow, and the Fellowship gasps. Immense pillars stretch up into the dark; hall after hall of carved stone, all deserted.',{scene:'moria'}),
  ['gimli','sad',"This is no mine. It is a *tomb*. Gloin said there was a halls here... the greatest of the Dwarves. What has happened to them?",{scene:'moria'}],
  ['gandalf','stern',"We follow the Dwarf-road. Stay close and *touch nothing*. Aragorn, look about; Frodo, to me. Remember: this place is older than the memory of Men.",{scene:'moria'}]]);
-async function storyMoriaHall(){flag('mhArrived');chapter(5);await say('mhArrive');objective("Explore the hall. Balin's tomb is in the western chamber.");return null}
+async function storyMoriaHall(){flag('mhArrived');chapter(5);await say('mhArrive');objective("Explore the hall. Balin's tomb is in the western chamber.",{x:8,y:31.4});return null}
 chain('tomb1',[
  N('A low chamber lined with stone: in the centre, a white tomb bears the runes of Dwarvish letters. Gimli stands very still. Behind him, Gandalf lifts a mouldering book from the bones of a fallen dwarf.',{scene:'moria'}),
  ['gimli','sad',"*Here lies Balin, Lord of Moria.* No. No, no, no... He is dead. My cousin is dead.",{scene:'moria'}],
@@ -198,21 +220,21 @@ D.tomb_c={who:'gandalf',m:'stern',scene:'moria',text:"Yes. Yes, you are right. T
 D.tomb_end={who:'narrator',scene:'moria',text:"Then, with a clatter of bones and iron, something heavy tumbles into the well-shaft outside. A skeleton, a bucket on a chain — Pippin, white-faced, standing behind it."};
 D.tomb_p={who:'pippin',m:'surprised',scene:'moria',text:"I'm so sorry! I only leaned on it! It was a perfectly *ordinary* bone!",next:'tomb_g'};
 D.tomb_g={who:'gandalf',m:'angry',scene:'moria',text:"Fool of a Took! *Throw yourself in next time, and rid us of your stupidity!* ... Oh, no. Listen.",next:'tomb_drum'};
-D.tomb_drum={who:'narrator',scene:'moria',text:"Far below, a single drum: *Doom. Doom.* Then another. Then dozens, a rolling thunder rising out of the dark. Sting glows blue at Frodo's belt.",fx:()=>{flag('orcsComing');flag('tombDone');objective('Orcs! Run for the Great Stair, to the north of the hall!')}};
+D.tomb_drum={who:'narrator',scene:'moria',text:"Far below, a single drum: *Doom. Doom.* Then another. Then dozens, a rolling thunder rising out of the dark. Sting glows blue at Frodo's belt.",fx:()=>{flag('orcsComing');flag('tombDone');objective('Orcs! Run for the Great Stair, to the north of the hall!',{x:30,y:18})}};
 async function moriaTomb(){await say('tomb1');await say('tomb_p');await say('orcWave');return null}
 chain('orcWave',[
  ['boromir','stern',"They have a cave troll. Frodo, behind me! Aragorn — *the door!*",{scene:'moria'}],
  N('Orcs boil out of the cracks and holes of the hall. Black-armoured, screeching, a hundred scimitars flashing. Aragorn and Legolas hold the door; Boromir, Gimli and Gandalf lay about them. Sam swings a frying pan.'),
  ['gandalf','angry',"To the bridge of Khazad-dûm! *Run*, you fools! This foe is beyond any of you!",{scene:'moria'}]]);
-D.orcWave_2.fx=()=>{flag('orcsComing');objective('Run for the Great Stair at the north of the hall.');
+D.orcWave_2.fx=()=>{flag('orcsComing');objective('Run for the Great Stair at the north of the hall.',{x:30,y:18});
   [[18,26],[26,24],[34,28],[40,24],[22,32],[30,30]].forEach(([x,y],i)=>addNpc({id:'orc'+i,spr:'orc',name:'Orc',x,y,dir:'down',solid:false}));};
 async function moriaWell(){await say('well1');flag('wellDone');return null}
 chain('well1',[N('The old well-shaft, gaping black. Far below, a faint echo; a clatter of bones.',{scene:'moria'})]);
 async function moriaStairs(){
   await say('stair0');
   const r=await puzzle('stairs');
-  if(r.ok){flag('stairsDone');bond('gandalf',1);await say('stairOk');objective('Cross the bridge of Khazad-dûm!');M.extra=M.extra.filter(n=>!n.id.startsWith('orc'))}
-  else{await say('stairBad');flag('stairsDone');bond('aragorn',-1);bond('boromir',1);objective('Cross the bridge of Khazad-dûm!');M.extra=M.extra.filter(n=>!n.id.startsWith('orc'))}
+  if(r.ok){flag('stairsDone');bond('gandalf',1);await say('stairOk');objective('Cross the bridge of Khazad-dûm!',{x:45,y:9.5,up:10});M.extra=M.extra.filter(n=>!n.id.startsWith('orc'))}
+  else{await say('stairBad');flag('stairsDone');bond('aragorn',-1);bond('boromir',1);objective('Cross the bridge of Khazad-dûm!',{x:45,y:9.5,up:10});M.extra=M.extra.filter(n=>!n.id.startsWith('orc'))}
   return null}
 D.stair0={who:'aragorn',m:'stern',name:'Aragorn',scene:'moria',text:"The Stair is broken in places. Watch where Legolas steps, and *remember*; one wrong tread and it is a long fall. I cannot carry you all."};
 D.stairOk={who:'gandalf',m:'smile',scene:'moria',text:"Quick feet, Frodo! Across! The way lies over the narrow bridge ahead."};
@@ -251,7 +273,7 @@ chain('lorGate',[
 D.lorGate_2.ch=[{t:'Gimli, please. Let me speak.',go:'lg_a',fx:()=>bond('gimli',0)},{t:'Haldir, we have come in great need. The Lady will see us.',go:'lg_b',fx:()=>bond('legolas',1)}];
 D.lg_a={who:'gimli',m:'sad',scene:'lorien',fx:()=>bond('gimli',1),text:"...Aye. Fine. For you, Frodo, I shall hold my tongue. But I shall *not* like it.",next:'lg_end'};
 D.lg_b={who:'elfB',m:'smile',name:'Haldir',scene:'lorien',text:"The Lady of the Wood is expecting you. She has been watching your journey. Come — and tread softly.",next:'lg_end'};
-D.lg_end={who:'elfB',m:'stern',name:'Haldir',scene:'lorien',text:"The Lady of the Wood is waiting. Follow the paths of white stone, through Caras Galadhon, to the Mirror grove.",fx:()=>{objective('Walk through Caras Galadhon. Galadriel waits to the south-east, in the Mirror grove.')}};
+D.lg_end={who:'elfB',m:'stern',name:'Haldir',scene:'lorien',text:"The Lady of the Wood is waiting. Follow the paths of white stone, through Caras Galadhon, to the Mirror grove.",fx:()=>{objective('Walk through Caras Galadhon. Galadriel waits to the south-east, in the Mirror grove.',{npc:'galadriel'})}};
 async function storyLorien(){flag('lorArrived');chapter(6);setTime('day');await say('lorGate');return null}
 D.haldir={who:'elfB',m:'smile',name:'Haldir',scene:'lorien',text:"The wood is long and old, and what is said about Galadriel is only half true. I would say no more than that."};
 D.celeborn={who:'elrond',m:'stern',name:'Celeborn',scene:'lorien',text:"The Lady and I have lived here a long age. We hear of the world's wrongs every night, and still we do not leave. Remember that, Ring-bearer."};
@@ -266,7 +288,7 @@ D.galMeet_3.ch=[{t:'I am afraid. Tell me what I must do.',go:'gal_a'},{t:'I will
 D.gal_a={who:'galadriel',m:'smile',scene:'lorien',fx:()=>{bond('trust',1);flag('galFear')},text:"Fear is no weakness when it keeps you humble. You will do what you must do: carry. That is the task. It is a small task and a great one. You are not alone; even the smallest person can change the course of the future.",next:'gal_end'};
 D.gal_b={who:'galadriel',m:'smile',scene:'lorien',fx:()=>{bond('heart',1);flag('galResolve')},text:"I see that your heart is as true as your word. Hold to it, even when the way grows dark, and darker still.",next:'gal_end'};
 D.gal_c={who:'galadriel',m:'smile',scene:'lorien',fx:()=>{flag('galCurious')},text:"I have lived through three Ages of the world. I have seen the great triumph and fall. Some things I see in water; some in the faces of those who stand before me.",next:'gal_end'};
-D.gal_end={who:'galadriel',m:'neutral',scene:'lorien',text:"Rest, all of you. At dusk, come to the Mirror, Frodo. It shows things that were, that are, and some that have not yet come to pass.",fx:()=>{flag('galMet');flag('mirrorReady');objective('Rest. At dusk, go to the Mirror grove (south-east). Optionally, find the silver mirror-stones in the north.')}};
+D.gal_end={who:'galadriel',m:'neutral',scene:'lorien',text:"Rest, all of you. At dusk, come to the Mirror, Frodo. It shows things that were, that are, and some that have not yet come to pass.",fx:()=>{flag('galMet');flag('mirrorReady');objective('Look into Galadriel\'s Mirror in the south-east grove. (Optional: find the silver mirror-stones in the north.)',{x:44,y:31.5})}};
 async function lorGaladriel(){if(!F().galMet)return'galMeet';if(F().mirrorDone)return'galAfter';return'galWait'}
 D.galWait={who:'galadriel',m:'smile',scene:'lorien',text:"The basin awaits you in the grove. Come when you are ready."};
 D.galAfter={who:'galadriel',m:'smile',scene:'lorien',text:"Go with the light of Eärendil; may it shine in the dark places when all other lights go out."};
@@ -324,7 +346,7 @@ chain('amArrive',[
 D.amArrive_1.ch=[{t:'I need to be alone for a little while.',go:'am_a'},{t:'Boromir, will you walk with me?',go:'am_b'}];
 D.am_a={who:'aragorn',m:'smile',scene:'amonhen',text:"Go. Be back before dusk.",next:'am_end',fx:()=>bond('aragorn',1)};
 D.am_b={who:'boromir',m:'smile',scene:'amonhen',text:"Not now. Go ahead; I will be along shortly.",next:'am_end'};
-D.am_end={who:'narrator',scene:'amonhen',text:"Frodo climbs alone toward the ruins at the top of the hill.",fx:()=>objective('Climb Amon Hen to the Seat of Seeing and think.')};
+D.am_end={who:'narrator',scene:'amonhen',text:"Frodo climbs alone toward the ruins at the top of the hill.",fx:()=>objective('Climb Amon Hen to the Seat of Seeing and think.',{x:24,y:6,up:30})};
 async function storyAmon(){
   flag('amArrived');chapter(7);
   const pk=[...G.party];G.party=[];
@@ -368,8 +390,8 @@ D.bor_choice={who:'narrator',scene:'amonhen',text:"Boromir's face twists, half s
 D.bc_hand={who:'boromir',m:'angry',scene:'amonhen',fx:()=>{ringUp(10);bond('trust',-2);flag('handedBoromir')},text:"It is... so beautiful... *Mine!* — Ah! No! It cannot...!",next:'bc_back'};
 D.bc_back={who:'narrator',scene:'amonhen',text:"Boromir lunges. You stumble. The Ring, trembling in your fist, slips onto your finger.",next:null};
 D.bor_soft={who:'boromir',m:'sad',scene:'amonhen',fx:()=>{bond('boromir',3);flag('boromirRedeemed')},text:"...I shall not take it. I cannot. Forgive me, Frodo. I felt it call, and for a moment — for one terrible moment — I listened. Go. Go on, with my blessing. I shall keep the others safe, whatever may come. I shall *not* follow.",ch:[{t:'Thank you, Boromir. I will remember your honour.',go:'bs_end',fx:()=>{bond('heart',2)}},{t:'Come with us. Help me carry the burden.',go:'bs_end2',fx:()=>{bond('boromir',2)}}]};
-D.bs_end={who:'boromir',m:'smile',scene:'amonhen',text:"Be safe, Ring-bearer.",fx:()=>{flag('frodoAlone');objective('Run to the river and take a boat to the eastern shore.')}};
-D.bs_end2={who:'boromir',m:'sad',scene:'amonhen',text:"No. If I come with you, I shall not be able to hold back. The Ring must be taken *away from men*. Go, small one. Quickly.",fx:()=>{flag('frodoAlone');objective('Run to the river and take a boat to the eastern shore.')}};
+D.bs_end={who:'boromir',m:'smile',scene:'amonhen',text:"Be safe, Ring-bearer.",fx:()=>{flag('frodoAlone');objective('Run to the river and take a boat to the eastern shore.',{x:38,y:31.4})}};
+D.bs_end2={who:'boromir',m:'sad',scene:'amonhen',text:"No. If I come with you, I shall not be able to hold back. The Ring must be taken *away from men*. Go, small one. Quickly.",fx:()=>{flag('frodoAlone');objective('Run to the river and take a boat to the eastern shore.',{x:38,y:31.4})}};
 D.bor_hard={who:'boromir',m:'stern',scene:'amonhen',text:"If you would only *think*! The Ring has a will of its own. It will betray you, as it betrayed Isildur. Give it to Gondor. *Give it to me.*",next:'bc_lunge_q'};
 D.bc_lunge_q={who:'narrator',scene:'amonhen',text:"He reaches for the chain around your neck.",next:null};
 async function boromirLunge(){
@@ -377,7 +399,7 @@ async function boromirLunge(){
   await flash(200);ringUp(8,'The Ring slides onto your finger.');G.ringOn=true;flag('usedRing');
   await say('seatVision');
   G.ringOn=false;flag('frodoAlone');
-  await say('seatAfter');objective('Run to the river and take a boat to the eastern shore.');return null}
+  await say('seatAfter');objective('Run to the river and take a boat to the eastern shore.',{x:38,y:31.4});return null}
 chain('seatVision',[
  N('The world falls away. Frodo\'s mind is flung to the top of the world: a vast dark land, a tower of black stone, and above it a single Eye, wreathed in flame. It turns. It finds him. A voice, enormous, not unlike thunder, speaks his name.',{scene:'eye'}),
  ['gandalf','stern',"*Take it off, Frodo!* TAKE IT OFF!",{scene:'eye',name:'Gandalf (voice)'}],

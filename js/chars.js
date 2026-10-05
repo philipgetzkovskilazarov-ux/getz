@@ -25,6 +25,7 @@ const SPEC={
  galadriel:{cls:'man',skin:'#fbe6d6',hair:{s:'long',c:'#f2dc94'},shirt:'#eceef8',vest:'#eceef8',pants:'#eceef8',dress:true,ears:true,glow:true},
  elrond:{cls:'man',skin:'#ecccae',hair:{s:'long',c:'#1c1218'},shirt:'#4c3c70',vest:'#4c3c70',pants:'#4c3c70',dress:true,ears:true,circlet:true},
  arwen:{cls:'man',skin:'#f8e0cc',hair:{s:'long',c:'#1a1016'},shirt:'#d8dcf0',vest:'#d8dcf0',pants:'#d8dcf0',dress:true,ears:true,circlet:true},
+ saruman:{cls:'man',skin:'#d6b8a4',hair:{s:'long',c:'#d8d8e4'},beard:{c:'#e4e4ee',len:8},shirt:'#d4d4e0',vest:'#d4d4e0',pants:'#c8c8d4',cloak:'#e0e0ea',staff:true,tall:1},
  butterbur:{cls:'man',fat:true,skin:'#eab08e',hair:{s:'bald',c:'#7a5a38'},beard:{c:'#8a6a3a',len:1},shirt:'#f2ead8',vest:'#f2ead8',pants:'#5a4a38',apron:true},
  harry:{cls:'man',skin:'#d6a688',hair:{s:'short',c:'#4a3a2a'},beard:{c:'#4a3a2a',len:2},shirt:'#4a4a3a',vest:'#4a4a3a',pants:'#3a3028',hat:{k:'cap',c:'#4a5a3a'}},
  breeA:{cls:'man',skin:'#d6a688',hair:{s:'short',c:'#7a5a38'},shirt:'#8a5a3a',vest:'#6a4a30',pants:'#4a3a2a'},

@@ -20,7 +20,7 @@ const flag=(k,v=true)=>{G.flags[k]=v};
 const F=()=>G.flags;
 function bond(who,n,msg){G.stats[who]=(G.stats[who]||0)+n;if(msg)toast(msg+(n>0?' ▲':' ▼'))}
 function ringUp(n,msg){G.stats.ring=U.clamp(G.stats.ring+n,0,100);if(msg)toast(msg,n>0?'warn':'');if(G.stats.ring>=100&&!G.flags.ringLost)ringLost()}
-function objective(t){G.objective=t;$('qtext').textContent=t;$('quest').classList.toggle('hide',!t)}
+function objective(t,target){G.objective=t;G.target=target||null;$('qtext').textContent=t;$('quest').classList.toggle('hide',!t)}
 function chapter(n){G.chapter=n}
 function toast(t,cls=''){const d=document.createElement('div');d.className='toast '+cls;d.textContent=t;$('toasts').appendChild(d);setTimeout(()=>d.remove(),4600);while($('toasts').children.length>4)$('toasts').firstChild.remove()}
 const pickR=(a)=>a[Math.floor(Math.random()*a.length)];
@@ -71,10 +71,11 @@ function followers(){return G.party.map((k,i)=>{const p=trail[Math.min(trail.len
 const PARTYSPR={sam:'sam',merry:'merry',pippin:'pippin',gandalf:'gandalf',aragorn:'aragorn',legolas:'legolas',gimli:'gimli',boromir:'boromir'};
 
 /* ================= collision ================= */
-function blocked(x,y){const hw=4.5,hh=2.5;
+function blocked(x,y,self){const hw=4.5,hh=2.5;
   for(const[ox,oy]of[[-hw,-hh],[hw,-hh],[-hw,hh],[hw,hh]]){const tx=Math.floor((x+ox)/T),ty=Math.floor((y+oy)/T);if(tx<0||ty<0||tx>=M.m.w||ty>=M.m.h)return true;if(BLOCK.has(M.m.t[ty*M.m.w+tx]))return true}
   for(const s of M.solids)if(x+hw>s[0]&&x-hw<s[0]+s[2]&&y+hh>s[1]&&y-hh<s[1]+s[3])return true;
-  for(const n of npcsNow())if(n.solid!==false&&Math.abs(x-n.x)<8&&Math.abs(y-n.y)<6)return true;
+  for(const n of npcsNow())if(n!==self&&n.solid!==false&&Math.abs(x-n.x)<8&&Math.abs(y-n.y)<6)return true;
+  if(self&&Math.abs(x-G.px)<9&&Math.abs(y-G.py)<7)return true;
   return false}
 
 /* ================= input ================= */
@@ -83,13 +84,13 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();
   ac();
   if(mode==='dlg'){dlgKey(k);return}
   if(mode==='puzzle'){if(window.PZKey)window.PZKey(k);return}
-  if(mode==='journal'){if(k==='escape'||k==='j'){closeJournal()}return}
+  if(mode==='journal'){if(k==='escape'||k==='j'||k==='tab'){closeJournal()}return}
   if(mode==='title'){if(k==='enter')$('bnew').click();return}
   if(k==='m'){muted=!muted;toast(muted?'Sound off':'Sound on');if(!muted)Music.cur&&(()=>{const c=Music.cur;Music.cur=null;Music.set(c)})()}
   if(mode!=='play')return;
   keys[k]=true;
   if(k==='e'||k==='enter'||k===' ')interact();
-  else if(k==='j')openJournal();
+  else if(k==='j'||k==='escape'||k==='tab')openJournal();
   else if(k==='r')toggleRing();
 });
 addEventListener('keyup',e=>{delete keys[e.key.toLowerCase()]});
@@ -108,7 +109,7 @@ function nearestInteractive(){let best=null,bd=30;const px=G.px,py=G.py-6;
 async function interact(){const t=nearestInteractive();if(!t)return;
   if(G.ringOn){toast('No one answers. They cannot see you while you wear the Ring.');return}
   runScript(async()=>{if(t.kind==='npc'){const n=t.n;const dx=G.px-n.x,dy=G.py-n.y;n.face=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');const r=await n.talk();if(typeof r==='string')await say(r)}else if(t.kind==='party'){const r=await window.partyTalk(t.f.key);if(typeof r==='string')await say(r)}else{const r=await t.o.act();if(typeof r==='string')await say(r)}})}
-async function runScript(fn){if(scriptDepth>0)return;scriptDepth++;const prev=mode;mode='busy';try{await fn()}catch(e){console.error(e);toast('Script error: '+e.message,'warn')}scriptDepth--;if(mode==='busy')mode='play';if(G&&M)save()}
+async function runScript(fn){if(scriptDepth>0)return;scriptDepth++;G.ringOn=false;const prev=mode;mode='busy';try{await fn()}catch(e){console.error(e);toast('Script error: '+e.message,'warn')}scriptDepth--;if(mode==='busy')mode='play';if(G&&M)save()}
 
 /* ================= update ================= */
 function update(dt){
@@ -129,6 +130,11 @@ function update(dt){
   /* fx: smoke, embers */
   for(const e of M.emit){e.t-=dt;if(e.t<0){e.t=.5+Math.random()*.7;M.fx.push({k:'smoke',x:e.x+(Math.random()-.5)*3,y:e.y,vx:4+Math.random()*4,vy:-9-Math.random()*5,l:0,max:3+Math.random()*1.5})}}
   for(const f of M.fx){f.l+=dt;f.x+=f.vx*dt;f.y+=f.vy*dt}M.fx=M.fx.filter(f=>f.l<f.max);
+  /* ambient NPC wandering (hobbits stroll, elves drift) */
+  if(mode==='play')for(const n of npcsNow()){if(!n.wander||n.solid===false)continue;
+    if(n.hx===undefined){n.hx=n.x;n.hy=n.y;n.wt=Math.random()*3}
+    n.wt-=dt;if(n.wt<=0&&!n.dest){n.wt=2+Math.random()*4;const a=Math.random()*6.28,r=Math.random()*n.wander;n.dest={x:n.hx+Math.cos(a)*r,y:n.hy+Math.sin(a)*r*.6}}
+    if(n.dest){const dx=n.dest.x-n.x,dy=n.dest.y-n.y,d=Math.hypot(dx,dy);if(d<1.5||Math.hypot(G.px-n.x,G.py-n.y)<30){n.dest=null;n.moving=false}else{const nx=n.x+dx/d*11*dt,ny=n.y+dy/d*11*dt;if(!blocked(nx,ny,n)){n.x=nx;n.y=ny;n.face=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');n.moving=true;n.walkT=(n.walkT||0)+dt*6}else{n.dest=null;n.moving=false}}}}
   /* orcs close in while the Fellowship runs for the stair */
   for(const n of M.extra){if(n.spr==='orc'&&G.flags.orcsComing&&!G.flags.stairsDone){const dx=G.px-n.x,dy=G.py-n.y,d=Math.hypot(dx,dy);if(d>56){n.x+=dx/d*16*dt;n.y+=dy/d*16*dt;n.face=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');n.moving=true;n.walkT=(n.walkT||0)+dt*8}else n.moving=false}}
 }
@@ -205,9 +211,16 @@ function render(t,dt){
   for(const f of M.fx){const a=Math.max(0,1-f.l/f.max)*.45;ctx.fillStyle=`rgba(230,230,240,${a})`;const s=1+f.l;ctx.fillRect(Math.round(f.x-cx),Math.round(f.y-cy),s|0||1,s|0||1)}
   drawLighting(t);
   drawWeather(t,dt);
+  drawMarker(t);
+  {const g=ctx.createRadialGradient(VW/2,VH/2,VH*.45,VW/2,VH/2,VW*.62);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(6,4,18,.34)');ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH)}
   if(G.ringOn){ctx.fillStyle='rgba(80,40,0,.25)';ctx.fillRect(0,0,VW,VH);const g=ctx.createRadialGradient(VW/2,VH/2,60,VW/2,VH/2,260);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(40,0,0,.65)');ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH)}
   else if(G.stats.ring>60){const a=(G.stats.ring-60)/100;const g=ctx.createRadialGradient(VW/2,VH/2,120,VW/2,VH/2,280);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,`rgba(60,10,0,${a})`);ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH)}
 }
+function targetPos(){const t=G.target;if(!t)return null;if(t.map&&t.map!==G.map)return null;if(t.npc){const n=npcsNow().find(n=>n.id===t.npc);return n?{x:n.x,y:n.y-34}:null}return{x:t.x*T,y:t.y*T-(t.up===undefined?20:t.up)}}
+function drawMarker(t){const p=targetPos();if(!p||mode!=='play')return;const sx=p.x-Math.round(CAM.x),sy=p.y-Math.round(CAM.y),bob=Math.sin(t*4)*2;
+  if(sx>8&&sx<VW-8&&sy>8&&sy<VH-8){ctx.fillStyle='#000a';ctx.beginPath();ctx.moveTo(sx,sy+bob+9);ctx.lineTo(sx+7,sy+bob);ctx.lineTo(sx,sy+bob-9);ctx.lineTo(sx-7,sy+bob);ctx.fill();ctx.fillStyle='#ffd070';ctx.beginPath();ctx.moveTo(sx,sy+bob+7);ctx.lineTo(sx+5,sy+bob);ctx.lineTo(sx,sy+bob-7);ctx.lineTo(sx-5,sy+bob);ctx.fill();ctx.fillStyle='#fff6c0';ctx.fillRect(sx-1,sy+bob-3,2,3)}
+  else{const cx=VW/2,cy=VH/2,a=Math.atan2(sy-cy,sx-cx),r=Math.min((VW/2-18)/Math.abs(Math.cos(a)||.001),(VH/2-18)/Math.abs(Math.sin(a)||.001)),ax=cx+Math.cos(a)*r,ay=cy+Math.sin(a)*r;
+    ctx.save();ctx.translate(ax,ay);ctx.rotate(a);ctx.fillStyle='#000a';ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-6,-8);ctx.lineTo(-6,8);ctx.fill();ctx.fillStyle='#ffd070';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-4,-6);ctx.lineTo(-4,6);ctx.fill();ctx.restore()}}
 function shadow(x,y){ctx.fillStyle='rgba(20,10,50,.32)';ctx.beginPath();ctx.ellipse(Math.round(x),Math.round(y),6,2.4,0,0,7);ctx.fill()}
 function drawNpc(n,sx,sy,t){const sp=n.spr==='_none'?null:n.spr;if(n.draw){n.draw(ctx,sx,sy,t);return}if(!sp)return;
   if(n.dog)return;let d=n.face;const dist=Math.hypot(n.x-G.px,n.y-G.py);if(!n.moving&&dist<54&&n.lookAt!==false){const dx=G.px-n.x,dy=G.py-n.y;d=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up')}
@@ -272,6 +285,8 @@ function sceneFx(c2,sc,t,dt){
     for(const q of sc._p){const ty=p.type;if(ty==='petal'||ty==='leaf'){q.x+=(10+Math.sin(t+q.ph)*8)*dt*q.s;q.y+=(8+q.s*10)*dt;if(q.y>200){q.y=-3;q.x=Math.random()*320}if(q.x>322)q.x=-2;c2.fillStyle=p.col[q.i%p.col.length];c2.fillRect(q.x|0,q.y|0,2,1);c2.fillRect((q.x+1)|0,(q.y+1)|0,1,1)}
       else if(ty==='ember'){q.y-=(9+q.s*13)*dt;q.x+=Math.sin(t+q.ph)*5*dt;if(q.y<0){q.y=200;q.x=Math.random()*320}c2.globalCompositeOperation='lighter';c2.fillStyle=p.col[q.i%p.col.length];c2.globalAlpha=.8;c2.fillRect(q.x|0,q.y|0,1,1);c2.globalAlpha=1;c2.globalCompositeOperation='source-over'}
       else if(ty==='dust'){q.x+=Math.sin(t*.5+q.ph)*3*dt;q.y+=Math.cos(t*.4+q.ph)*2*dt-1*dt;if(q.y<0)q.y=200;c2.globalCompositeOperation='lighter';c2.globalAlpha=.25+.2*Math.sin(t*2+q.ph);c2.fillStyle=p.col[0];c2.fillRect(q.x|0,q.y|0,1,1);c2.globalAlpha=1;c2.globalCompositeOperation='source-over'}
+      else if(ty==='snow'){q.y+=(34+q.s*40)*dt;q.x+=(-26+Math.sin(t*1.5+q.ph)*14)*dt;if(q.y>200){q.y=-3;q.x=Math.random()*340}if(q.x<-3)q.x=322;c2.fillStyle=p.col[q.i%p.col.length];c2.globalAlpha=.9;c2.fillRect(q.x|0,q.y|0,q.s>1?2:1,q.s>1?2:1);c2.globalAlpha=1}
+      else if(ty==='rain'){q.y+=(150+q.s*80)*dt;q.x-=40*dt;if(q.y>200){q.y=-6;q.x=Math.random()*340}c2.globalAlpha=.4;c2.fillStyle=p.col[0];c2.fillRect(q.x|0,q.y|0,1,5);c2.globalAlpha=1}
       else if(ty==='firework'){}}
     if(p.type==='firework'){sc._fw=sc._fw||[];if(Math.random()<dt*1.4)sc._fw.push({x:40+Math.random()*240,y:30+Math.random()*60,l:0,c:pickR(['#ff5a7a','#ffd23a','#7ad8ff','#8aff7a','#ff9aff'])});
       for(const f of sc._fw){f.l+=dt;const k=f.l/1.4;c2.globalCompositeOperation='lighter';for(let a=0;a<18;a++){const ang=a/18*6.28,r=k*28,x=f.x+Math.cos(ang)*r,y=f.y+Math.sin(ang)*r+k*k*14;c2.globalAlpha=Math.max(0,1-k);c2.fillStyle=f.c;c2.fillRect(x|0,y|0,1,1);c2.fillRect((x+Math.cos(ang))|0,(y+Math.sin(ang))|0,1,1)}c2.globalAlpha=1;c2.globalCompositeOperation='source-over'}sc._fw=sc._fw.filter(f=>f.l<1.4)}}

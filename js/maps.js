@@ -41,7 +41,7 @@ MAPS.shire={id:'shire',name:'The Shire — Hobbiton',w:64,h:46,seed:7,scene:'shi
   /* Bag End & neighbours */
   L.obj('hole',14,14.2,{w:168,h:134,dr:22,wx:58,chx:36,seed:5});L.obj('flowerbed',9.5,14.8,{w:40}).obj('flowerbed',18.7,14.8,{w:40,cols:['#ffd23a','#ff9a3a','#ff5a7a']});
   L.obj('fenceH',9,16.6,[4]).obj('fenceH',18,16.6,[4]);L.obj('lamp',11.4,16,{}).obj('lamp',16.6,16,{});
-  L.obj('smial',5.5,23.5,{door:'#c0392b'});L.obj('smial',7,33,{door:'#2f6fc0'});L.obj('smial',31.5,36.5,{door:'#c8a020'});L.obj('smial',55,31.5,{door:'#8a3ab0'});L.obj('smial',38,31,{door:'#2f9a4a'});
+  L.obj('fenceH',27,22.4,[6,{col:'#b88a50'}]).obj('fenceH',27,25.4,[6,{col:'#b88a50'}]);L.obj('smial',5.5,23.5,{door:'#c0392b'});L.obj('smial',7,33,{door:'#2f6fc0'});L.obj('smial',31.5,36.5,{door:'#c8a020'});L.obj('smial',55,31.5,{door:'#8a3ab0'});L.obj('smial',38,31,{door:'#2f9a4a'});
   L.obj('flowerbed',33,37.6,{}).obj('barrel',26.5,19,[]).obj('crate',27.5,19,[{fruit:'#e84a4a'}]);
   L.obj('sign',16.5,22.6,{seed:2}).obj('fireworkCart',20.8,19.6,[]);L.obj('well',36,26.6,[]);
   /* Party field */
@@ -61,13 +61,13 @@ MAPS.shire={id:'shire',name:'The Shire — Hobbiton',w:64,h:46,seed:7,scene:'shi
   {id:'sam',spr:'sam',por:'sam',name:'Sam',x:30.5,y:34.5,dir:'down',talk:()=>shireSam(),show:()=>!G.party.includes('sam')},
   {id:'merry',spr:'merry',por:'merry',name:'Merry',x:22.4,y:20.8,dir:'left',talk:()=>shireMerry(),show:()=>!G.party.includes('merry')},
   {id:'pippin',spr:'pippin',por:'pippin',name:'Pippin',x:23.4,y:21.2,dir:'left',talk:()=>shirePippin(),show:()=>!G.party.includes('pippin')},
-  {id:'gaffer',spr:'gaffer',por:'gaffer',name:'Gaffer Gamgee',x:28.5,y:37,dir:'right',talk:()=>'gaffer1',show:()=>true},
-  {id:'lobelia',spr:'lobelia',por:'lobelia',name:'Lobelia',x:40.5,y:21,dir:'down',talk:()=>'lobelia1',show:()=>F().time!=='night'},
-  {id:'hobA',spr:'hobbitA',por:'pippin',name:'Hobbit',x:44,y:19.8,dir:'up',talk:()=>'hobA',show:()=>F().time==='dusk'},
-  {id:'hobB',spr:'hobbitB',por:'merry',name:'Hobbit',x:50,y:21.2,dir:'left',talk:()=>'hobB',show:()=>F().time==='dusk'},
-  {id:'hobC',spr:'hobbitC',por:'sam',name:'Hobbit',x:55.5,y:19.6,dir:'down',talk:()=>'hobC',show:()=>F().time==='dusk'},
-  {id:'hobK',spr:'hobbitKid',por:'pippin',name:'Hobbit child',x:47,y:21.5,dir:'down',talk:()=>'hobK',show:()=>F().time==='dusk'},
-  {id:'hobD',spr:'hobbitC',por:'sam',name:'Neighbour',x:6.5,y:25.5,dir:'down',talk:()=>'hobD',show:()=>F().time!=='night'}],
+  {id:'gaffer',wander:22,spr:'gaffer',por:'gaffer',name:'Gaffer Gamgee',x:28.5,y:37,dir:'right',talk:()=>'gaffer1',show:()=>true},
+  {id:'lobelia',wander:22,spr:'lobelia',por:'lobelia',name:'Lobelia',x:40.5,y:21,dir:'down',talk:()=>'lobelia1',show:()=>F().time!=='night'},
+  {id:'hobA',wander:22,spr:'hobbitA',por:'pippin',name:'Hobbit',x:44,y:19.8,dir:'up',talk:()=>'hobA',show:()=>F().time==='dusk'},
+  {id:'hobB',wander:22,spr:'hobbitB',por:'merry',name:'Hobbit',x:50,y:21.2,dir:'left',talk:()=>'hobB',show:()=>F().time==='dusk'},
+  {id:'hobC',wander:22,spr:'hobbitC',por:'sam',name:'Hobbit',x:55.5,y:19.6,dir:'down',talk:()=>'hobC',show:()=>F().time==='dusk'},
+  {id:'hobK',wander:22,spr:'hobbitKid',por:'pippin',name:'Hobbit child',x:47,y:21.5,dir:'down',talk:()=>'hobK',show:()=>F().time==='dusk'},
+  {id:'hobD',wander:22,spr:'hobbitC',por:'sam',name:'Neighbour',x:6.5,y:25.5,dir:'down',talk:()=>'hobD',show:()=>F().time!=='night'}],
  exits:[{x:62.5,y:20,w:1.5,h:6,to:'bree',tx:3,ty:21,if:()=>false,msg:"Not yet. There is more to settle before you leave the Shire."}],
  inter:[{id:'bagdoor',x:14*16,y:14.4*16,r:20,label:'Bag End',act:()=>shireDoor(),show:()=>true},
         {id:'fwcart',x:20.8*16,y:19.4*16,r:22,label:'Gandalf\'s fireworks cart',act:()=>say('fwcart'),show:()=>!F().fireworksDone},
@@ -103,10 +103,10 @@ MAPS.bree={id:'bree',name:'Bree',w:60,h:44,seed:11,scene:'bree',music:'bree',wea
  npcs:[
   {id:'harry',spr:'harry',por:'harry',name:'Harry',x:6,y:20.4,dir:'right',talk:()=>'harry1',show:()=>true},
   {id:'butterbur',spr:'butterbur',por:'butterbur',name:'Barliman Butterbur',x:28,y:20.5,dir:'down',talk:()=>breeButterbur(),show:()=>true},
-  {id:'breeA',spr:'breeA',por:'harry',name:'Townsman',x:18,y:21.6,dir:'right',talk:()=>'breeA',show:()=>true},
-  {id:'breeB',spr:'breeB',por:'harry',name:'Merchant',x:23.5,y:27.4,dir:'down',talk:()=>'breeB',show:()=>true},
-  {id:'breeC',spr:'breeC',por:'harry',name:'Horse-trader',x:36,y:20.6,dir:'left',talk:()=>'breeC',show:()=>true},
-  {id:'breeD',spr:'breeD',por:'butterbur',name:'Villager',x:37.4,y:27.6,dir:'down',talk:()=>'breeD',show:()=>true},
+  {id:'breeA',wander:22,spr:'breeA',por:'harry',name:'Townsman',x:18,y:21.6,dir:'right',talk:()=>'breeA',show:()=>true},
+  {id:'breeB',wander:22,spr:'breeB',por:'harry',name:'Merchant',x:23.5,y:27.4,dir:'down',talk:()=>'breeB',show:()=>true},
+  {id:'breeC',wander:22,spr:'breeC',por:'harry',name:'Horse-trader',x:36,y:20.6,dir:'left',talk:()=>'breeC',show:()=>true},
+  {id:'breeD',wander:22,spr:'breeD',por:'butterbur',name:'Villager',x:37.4,y:27.6,dir:'down',talk:()=>'breeD',show:()=>true},
   {id:'strider',spr:'aragorn',por:'aragorn',name:'Strider',x:34,y:22.6,dir:'left',talk:()=>breeStrider(),show:()=>!!F().striderOutside&&!G.party.includes('aragorn')}],
  exits:[{x:0,y:19,w:1.5,h:5,to:'shire',tx:61,ty:23,if:()=>false,msg:"The road back to the Shire... but there is no turning back now."},
         {x:58.5,y:19,w:1.5,h:5,to:'weathertop',tx:4,ty:26,if:()=>!!F().breeDone,msg:"You should not leave Bree before Strider has spoken with you."}],
@@ -168,13 +168,13 @@ MAPS.rivendell={id:'rivendell',name:'Rivendell — The Last Homely House',w:64,h
   {id:'gandalf',spr:'gandalf',por:'gandalf',name:'Gandalf',x:33.8,y:25.6,dir:'down',talk:()=>rivGandalf(),show:()=>!G.party.includes('gandalf')},
   {id:'bilbo',spr:'bilbo',por:'bilbo',name:'Bilbo',x:21.4,y:27.6,dir:'right',talk:()=>rivBilbo(),show:()=>true},
   {id:'elrond',spr:'elrond',por:'elrond',name:'Elrond',x:40.5,y:20.2,dir:'down',talk:()=>rivElrond(),show:()=>true},
-  {id:'arwen',spr:'arwen',por:'arwen',name:'Arwen',x:31,y:13.6,dir:'down',talk:()=>'arwen1',show:()=>true},
+  {id:'arwen',spr:'arwen',por:'arwen',name:'Arwen',x:31,y:13.6,dir:'down',talk:()=>rivArwen(),show:()=>true},
   {id:'legolas',spr:'legolas',por:'legolas',name:'Legolas',x:48,y:19.6,dir:'down',talk:()=>rivLegolas(),show:()=>!G.party.includes('legolas')},
   {id:'gimli',spr:'gimli',por:'gimli',name:'Gimli',x:51.4,y:23.6,dir:'left',talk:()=>rivGimli(),show:()=>!G.party.includes('gimli')},
   {id:'boromir',spr:'boromir',por:'boromir',name:'Boromir',x:50.4,y:27.2,dir:'up',talk:()=>rivBoromir(),show:()=>!G.party.includes('boromir')},
-  {id:'elfA',spr:'elfA',por:'legolas',name:'Elf',x:24,y:30,dir:'down',talk:()=>'elfA',show:()=>true},
-  {id:'elfB',spr:'elfB',por:'elrond',name:'Elf',x:28.4,y:36.6,dir:'right',talk:()=>'elfB',show:()=>true},
-  {id:'elfC',spr:'elfC',por:'galadriel',name:'Elf',x:12,y:28,dir:'right',talk:()=>'elfC',show:()=>true}],
+  {id:'elfA',wander:22,spr:'elfA',por:'legolas',name:'Elf',x:24,y:30,dir:'down',talk:()=>'elfA',show:()=>true},
+  {id:'elfB',wander:22,spr:'elfB',por:'elrond',name:'Elf',x:28.4,y:36.6,dir:'right',talk:()=>'elfB',show:()=>true},
+  {id:'elfC',wander:22,spr:'elfC',por:'galadriel',name:'Elf',x:12,y:28,dir:'right',talk:()=>'elfC',show:()=>true}],
  exits:[{x:0,y:20,w:1.5,h:6,to:'weathertop',tx:44,ty:10,if:()=>false,msg:"The road behind you is long; there is no going back."},
         {x:28,y:44.4,w:8,h:1.6,to:'moriaGate',tx:22,ty:16,if:()=>!!F().fellowshipFormed,msg:"The Council has not yet decided what to do with the Ring."}],
  inter:[{id:'rivfount',x:32*16,y:31*16,r:30,label:'Fountain',act:()=>say('rivfount'),show:()=>true},
@@ -258,8 +258,8 @@ MAPS.lorien={id:'lorien',name:'Lothlórien — Caras Galadhon',w:56,h:42,seed:61
   {id:'galadriel',spr:'galadriel',por:'galadriel',name:'Galadriel',x:44,y:29.6,dir:'down',talk:()=>lorGaladriel(),show:()=>true},
   {id:'celeborn',spr:'elrond',por:'elrond',name:'Celeborn',x:41.6,y:30.4,dir:'right',talk:()=>'celeborn',show:()=>true},
   {id:'haldir',spr:'elfB',por:'legolas',name:'Haldir',x:5,y:20.8,dir:'right',talk:()=>'haldir',show:()=>true},
-  {id:'elfL1',spr:'elfA',por:'galadriel',name:'Elf',x:26,y:25,dir:'down',talk:()=>'elfL1',show:()=>true},
-  {id:'elfL2',spr:'elfC',por:'galadriel',name:'Elf',x:32,y:13,dir:'down',talk:()=>'elfL2',show:()=>true},
+  {id:'elfL1',wander:22,spr:'elfA',por:'galadriel',name:'Elf',x:26,y:25,dir:'down',talk:()=>'elfL1',show:()=>true},
+  {id:'elfL2',wander:22,spr:'elfC',por:'galadriel',name:'Elf',x:32,y:13,dir:'down',talk:()=>'elfL2',show:()=>true},
   ],
  exits:[{x:54.6,y:18,w:1.4,h:6,to:'amonHen',tx:3,ty:18,if:()=>!!F().lorDone,msg:"The Lady has not yet bidden you farewell."}],
  inter:[{id:'mirror',x:44*16,y:30.6*16,r:34,label:"Galadriel's Mirror",act:()=>lorMirror(),show:()=>!!F().mirrorReady&&!F().mirrorDone},

@@ -12,13 +12,14 @@ const chooseTag=async(id)=>say(id);
 
 /* ============ PROLOGUE & START ============ */
 chain('prologue',[
- N('In the Second Age of Middle-earth, the Dark Lord *Sauron* forged a Ring in the fires of Mount Doom — a master Ring, to bind all others to his will.',{scene:'dark'}),
+ N('In the Second Age of Middle-earth, the Dark Lord *Sauron* forged a Ring in the fires of Mount Doom — a master Ring, to bind all others to his will.',{scene:'lastAlliance'}),
  N('Elves, Dwarves and Men stood against him. At the foot of the Mountain, Prince Isildur cut the Ring from Sauron\'s hand, and the Dark Lord was undone.'),
  N('But Isildur could not bring himself to destroy it. The Ring betrayed him, slipped away into a river, and was lost for an age.'),
- N('It was found by a creature called Gollum, who hid with it beneath the mountains for five hundred years... until, by chance, it passed to a very ordinary hobbit named *Bilbo Baggins*.',{scene:'shireDay'}),
+ N('It was found by a creature called *Gollum*, who hid with it beneath the mountains for five hundred years...',{scene:'gollum'}),
+ N('...until, by chance, it passed to a very ordinary hobbit named *Bilbo Baggins*, and came to the green and quiet land of the Shire.',{scene:'shireDay'}),
  N('Tonight, in the green and peaceful Shire, Bilbo will celebrate his eleventy-first birthday. His heir, young Frodo, is about to learn that nothing will ever be ordinary again.'),
  ['frodo','smile','A fine day for a party. I ought to find *Gandalf* — he promised fireworks, and I would like to know how much trouble he has brought with him.']]);
-async function storyStart(){flag('started');chapter(1);setTime('day');await say('prologue');objective('Find Gandalf near his fireworks cart, west of the stream.');toast('Tip: walk up to people and press E to talk.')}
+async function storyStart(){flag('started');chapter(1);setTime('day');await say('prologue');objective('Find Gandalf near his fireworks cart, west of the stream.',{npc:'gandalf'});toast('Tip: walk up to people and press E to talk.')}
 
 /* ============ GANDALF ============ */
 D.gIntro={who:'gandalf',m:'smile',scene:'shireDay',text:"Frodo Baggins! There you are. Look at you — a fine hobbit in the prime of life, and not a trace of dust on the brass buttons. How is my old friend Bilbo?",ch:[
@@ -28,7 +29,7 @@ D.gIntro={who:'gandalf',m:'smile',scene:'shireDay',text:"Frodo Baggins! There yo
 D.gI_a={who:'gandalf',m:'happy',fx:()=>bond('gandalf',1),text:"Hah! Then we shall give him a night he never forgets. Fireworks, a dragon, and a few surprises I am rather proud of.",next:'gI_end'};
 D.gI_b={who:'gandalf',m:'angry',fx:()=>{bond('gandalf',1);bond('merry',-1);bond('pippin',-1);flag('toldOnPranksters')},text:"Do they now? *Hmm.* Those two have the best intentions and the worst timing in all of Middle-earth. I shall keep an eye on my cart.",next:'gI_end'};
 D.gI_c={who:'gandalf',m:'worried',fx:()=>{bond('gandalf',2);flag('toldGandalfWorry')},text:"Strange, you say? Hm. Bilbo has lived a long life, Frodo, and long lives leave... marks. Keep close to him tonight. I would like to speak with him, privately, once the party is done.",next:'gI_end'};
-D.gI_end={who:'gandalf',m:'smile',text:"Go and enjoy yourself, my boy. When the lanterns are lit, find *Bilbo* at the Party Tree — he will want to begin.",fx:()=>{flag('gandalfIntro');objective('Go and find Bilbo at Bag End, then join the party.')}};
+D.gI_end={who:'gandalf',m:'smile',text:"Go and enjoy yourself, my boy. When the lanterns are lit, find *Bilbo* at the Party Tree — he will want to begin.",fx:()=>{flag('gandalfIntro');objective('Go and find Bilbo at Bag End, then join the party.',{npc:'bilbo'})}};
 D.gWait={who:'gandalf',m:'smile',text:()=>F().gandalfIntro?"Bilbo is waiting at the gate of Bag End. Do not keep a birthday hobbit waiting.":"",ch:[{t:'I will go to him now.',go:null},{t:"Is there anything you aren't telling me?",go:'gWait2'}]};
 D.gWait2={who:'gandalf',m:'neutral',text:"There is *always* something I am not telling you, Frodo. A wizard's habit. Today it is only the fireworks."};
 async function shireGandalf(){
@@ -85,13 +86,13 @@ chain('bilboSpeech',[
  ['bilbo','smile',"Eleventy-one years is far too short a time to live among such excellent and admirable hobbits. I know *half* of you half as well as I should like, and I like less than half of you half as well as you deserve."],
  ['bilbo','sad',"I regret to announce that this is the end. I am going. I am leaving *now*. Goodbye!"],
  N('Bilbo slips something into his pocket. There is a bright flash, a puff of smoke... and the old hobbit has vanished into thin air. The crowd gasps, then bursts into confused applause.')]);
-D.bilboGone={who:'gandalf',m:'worried',scene:'shireDusk',text:"*Hm.* So he has gone and done it. Frodo, I must go to Bag End at once. Come with me.",fx:()=>objective('Follow Gandalf to Bag End.')};
+D.bilboGone={who:'gandalf',m:'worried',scene:'shireDusk',text:"*Hm.* So he has gone and done it. Frodo, I must go to Bag End at once. Come with me.",fx:()=>objective('Follow Gandalf to Bag End.',{npc:'gandalf'})};
 async function bagEndRing(){
   await transition(async()=>{place('gandalf',13,15.3,'up');G.px=14.5*T;G.py=15.5*T;G.dir='up';resetTrail()});
   await say('bagend1');flag('hasRing');updateHud();ringUp(0);sfx.ring();await wait(400);
   await say('bagend2');objective('');
   await transition(async()=>{setTime('day');flag('partyDone');hideNpc('gandalf');flag('gandalfGone');chapter(1);G.px=14*T;G.py=16.2*T;G.dir='down';resetTrail()});
-  await say('years');flag('gandalfGone',false);delete G.flags['hide_gandalf'];place('gandalf',14,17.2,'up');objective('Gandalf has returned. Speak with him at Bag End.')}
+  await say('years');flag('gandalfGone',false);delete G.flags['hide_gandalf'];place('gandalf',14,17.2,'up');objective('Gandalf has returned. Speak with him at Bag End.',{npc:'gandalf'})}
 chain('bagend1',[
  ['gandalf','stern',"Bilbo! You had that Ring in your pocket, did you not? Do not do this. Leave it behind.",{scene:'bagend'}],
  ['bilbo','angry',"What are you talking about? The Ring is mine. It was *given* to me. My own... my *precious*."],
@@ -115,9 +116,10 @@ async function gandalfReturns(){
   if(ok){bond('gandalf',2,'Gandalf is impressed');await say('gRunesOk')}else await say('gRunesFail');
   flag('runesDone');chapter(1);
   await say('gSam');await say('gLeave');
+  await say('isengard');
   hideNpc('gandalf');flag('gandalfGone');joinParty('sam');hideNpc('sam');
   place('merry',52.4,22.2,'left');place('pippin',53.8,22.6,'left');flag('sawRoad');
-  objective('Take the Ring east out of the Shire. Merry and Pippin are waiting by the road.');return null}
+  objective('Take the Ring east out of the Shire. Merry and Pippin are waiting by the road.',{npc:'merry'});return null}
 chain('gRet',[
  ['gandalf','stern',"Frodo. We have not much time. Is it safe? Bring me the Ring.",{scene:'bagend',side:'right'}],
  ['frodo','worried',"It is here, in the fire... as you told me. Gandalf, I have not touched it in all these years."],
@@ -139,6 +141,14 @@ D.gSam_c={who:'sam',m:'neutral',fx:()=>{bond('sam',1);flag('samSilenced')},text:
 D.gSam_end={who:'gandalf',m:'smile',text:"Well, there it is. Master Samwise, you shall go with Frodo. And mind you keep him *out of trouble*."};
 D.gLeave={who:'gandalf',m:'stern',scene:'bagend',text:"Now go. Leave by the back, and do not travel by the main road. I have one more errand: an old friend in Isengard, who may help us. Meet me at the Prancing Pony in Bree. *Do not put it on.* Not for any reason.",fx:()=>{chapter(1)}};
 
+chain('isengard',[
+ N('Meanwhile, far to the south, a grey horse is driven hard up the road to Isengard, where the tower of Orthanc rises black and sheer out of a valley of smoke and forges.',{scene:'orthanc'}),
+ ['saruman','smile',"Gandalf the Grey! Come in, old friend, out of the rain. You look weary. What news brings you so far from your comfortable fire?",{scene:'orthanc'}],
+ ['gandalf','worried',"Saruman, the Enemy's *Ring has been found*. In the Shire, of all places. You know more of the lore of the Rings than any living soul. I need your library and your counsel.",{scene:'orthanc'}],
+ ['saruman','stern',"The One Ring, in a halfling's pocket... *Hm.* Tell me, Gandalf — where is it now? Is it safe? Is it hidden?",{scene:'orthanc'}],
+ ['gandalf','stern',"I never said it had a hiding-place, Saruman. And I have not told you where it was found. Only that it was found.",{scene:'orthanc'}],
+ ['saruman','angry',"...Then you are wiser than I took you for. The Ring *will* be found. It will be mine — and you shall wait here until it is.",{scene:'orthanc'}],
+ N('A white light bursts from Saruman\'s staff; Gandalf is hurled across the chamber and falls. When he wakes he is high on the pinnacle of Orthanc, with the whole sky wheeling about him and no stair in sight.',{scene:'orthanc'})]);
 /* ============ NEIGHBOURS ============ */
 chain('gaffer1',[['gaffer','neutral',"Ahh, Mr. Frodo. Terrible times. Dwarves coming through; strange folk about. Mr. Bilbo wouldn't have stood for it. And my Sam, he's gone off all peculiar, talking about elves.",{scene:'shireDay'}]]);
 D.gaffer1.ch=[{t:'Sam will be fine, Gaffer.',go:null,fx:()=>bond('heart',1)},{t:'Strange folk? What strange folk?',go:'gaffer2'}];
@@ -165,7 +175,7 @@ D.mpJoin={who:'merry',m:'happy',scene:'road',text:"Frodo! We heard you were goin
  {t:"I'm glad. I could not do this alone.",go:'mpJ_b',fx:()=>{bond('merry',1);bond('pippin',1)}}]};
 D.mpJ_a={who:'pippin',m:'angry',fx:()=>{bond('merry',-1);bond('pippin',-1)},text:"If you are going to be a hero, we shall be *heroes' sidekicks*. Done. We are coming.",next:'mpJoined'};
 D.mpJ_b={who:'pippin',m:'happy',text:"That's more like it. Besides, the three of us make better company than Sam alone, no offence, Sam.",next:'mpJoined'};
-D.mpJoined={who:'sam',m:'smile',text:"None taken, Mr. Pippin. Let's get on before the Gaffer finds out.",fx:()=>{joinParty('merry');joinParty('pippin');flag('readyToLeave');hideNpc('merry');hideNpc('pippin');objective('Follow the road east, out of the Shire.')}};
+D.mpJoined={who:'sam',m:'smile',text:"None taken, Mr. Pippin. Let's get on before the Gaffer finds out.",fx:()=>{joinParty('merry');joinParty('pippin');flag('readyToLeave');hideNpc('merry');hideNpc('pippin');objective('Follow the road east, out of the Shire.',{x:62,y:23})}};
 chain('roadRiders',[
  N('As the sun slips down, the hobbits quicken their step along the lane. Sam stops suddenly.',{scene:'road'}),
  ['sam','worried',"Mr. Frodo. Listen. There's hoofbeats... and something else. Like someone *sniffing*."],
@@ -188,7 +198,7 @@ D.harry1={who:'harry',m:'stern',scene:'bree',text:"Halt! Strange hours for hobbi
 D.gate_real={who:'harry',m:'neutral',fx:()=>{flag('realName');bond('trust',-1)},text:"Baggins? Hm. Rings a bell... never mind. In you go. The inn at the end of the street has beds a-plenty.",next:'gate_end'};
 D.gate_alias={who:'harry',m:'smile',fx:()=>{flag('alias');bond('trust',1)},text:"Underhill, aye. Well, Master Underhill, take the main street; the Prancing Pony is the big place on your left. Mind the horses.",next:'gate_end'};
 D.gate_rude={who:'harry',m:'angry',fx:()=>{bond('heart',-1)},text:"Humph. Well, there's no law against rudeness in Bree, only against stealing. Move along.",next:'gate_end'};
-D.gate_end={who:'sam',m:'worried',text:"Mr. Frodo, it's ever so dark in here. And look at the size of them folk! Let's find Mr. Gandalf and get a roof over our heads.",fx:()=>objective('Find Gandalf at the Prancing Pony.')};
+D.gate_end={who:'sam',m:'worried',text:"Mr. Frodo, it's ever so dark in here. And look at the size of them folk! Let's find Mr. Gandalf and get a roof over our heads.",fx:()=>objective('Find Gandalf at the Prancing Pony.',{x:27.3,y:17.6,up:10})};
 async function storyBreeArrive(){flag('breeArrived');chapter(2);await say('harry1');return null}
 async function breeButterbur(){if(F().breeInnDone)return'butterbur_after';await breePonyDoor();return null}
 D.butterbur_after={who:'butterbur',m:'smile',scene:'pony',text:"Mind how you go, Master Underhill — or whatever you're called. The roads are not what they were. Not what they were at all."};
@@ -230,7 +240,7 @@ async function ponyScene(){
   await transition(async()=>{});
   await say('nightAttack');await bree_letter();
   flag('breeInnDone');flag('breeDone');flag('striderOutside');joinParty('aragorn');
-  chapter(2);objective('Leave Bree by the east gate with Strider.');hideNpc('strider')}
+  chapter(2);objective('Leave Bree by the east gate with Strider.',{x:57,y:21,up:8});hideNpc('strider')}
 chain('nightAttack',[
  N('That night, in the dark of the back rooms, soft footsteps climb the stairs. A heavy blade slashes down through four pillows... and finds only feathers.',{scene:'bree'}),
  ['aragorn','stern',"Four beds slashed to ribbons, and not a hobbit in them. *Good.* That was close — they will come back in numbers. Gather your things. We leave at first light.",{scene:'pony'}]]);
@@ -251,7 +261,7 @@ chain('wtArrive',[
  N('They travel by marsh and moor for days, the Ranger keeping them off the roads. At last, at dusk, the broken ring of walls on Weathertop rises black against the sky.',{scene:'weathertop'}),
  ['aragorn','neutral',"We shall rest here, in the ruins. The old watchtower of Amon Sûl. Sam, take the others and find firewood. Keep to the stones and *keep your voices down*.",{scene:'weathertop'}],
  ['sam','smile',"Right you are, Mr. Strider. Though I'm good for more than chopping, you know. I can cook. Sausages, bacon, tomatoes — I've carried it all this way."]]);
-async function storyWeathertop(){flag('wtArrived');chapter(3);G.party=G.party.filter(k=>k!=='aragorn');place('aragorn',27,19.6,'left');await say('wtArrive');objective('Talk to Strider by the campfire.');return null}
+async function storyWeathertop(){flag('wtArrived');chapter(3);G.party=G.party.filter(k=>k!=='aragorn');place('aragorn',27,19.6,'left');await say('wtArrive');objective('Talk to Strider by the campfire.',{npc:'aragorn'});return null}
 D.wtA1={who:'aragorn',m:'neutral',name:'Strider',scene:'weathertop',text:"Sit, Frodo. A short rest. You were braver than you knew, in Bree. Ask me anything you like — only be quick.",ch:[
  {t:'Who are you, really?',go:'wtA_who'},
  {t:'Where do you come from?',go:'wtA_home'},
@@ -259,7 +269,7 @@ D.wtA1={who:'aragorn',m:'neutral',name:'Strider',scene:'weathertop',text:"Sit, F
 D.wtA_who={who:'aragorn',m:'smile',name:'Strider',fx:()=>{bond('aragorn',1);flag('wtAsked')},text:"A Ranger. One of the last. We guard these lands in secret; the people of the Shire hardly know we exist. They sleep soundly in their beds because of men like me.",next:'wtA_end'};
 D.wtA_home={who:'aragorn',m:'sad',name:'Strider',fx:()=>{bond('aragorn',2);flag('wtAsked')},text:"A long way north and west, in a country that was once mine... and a great deal longer ago, in a house of silver tongues, in the valley of Rivendell. I may see it again. I may not.",next:'wtA_end'};
 D.wtA_ring={who:'aragorn',m:'stern',name:'Strider',fx:()=>{bond('trust',1);flag('wtAsked')},text:"Safe? No. The Ring is the most dangerous thing in the world. Never wear it. Not once. Even holding it makes you a beacon for the Enemy. *If you must put it on to save your life*, remember: it is a hunter, and it watches you.",next:'wtA_end'};
-D.wtA_end={who:'aragorn',m:'stern',name:'Strider',text:"I shall scout the hill. Stay by the fire. Whatever you hear, *do not* leave the circle of light.",fx:()=>{flag('wtTalked');G.party=G.party.filter(k=>k!=='aragorn');hide_ara();objective('Rest by the campfire. Something does not feel right.')}};
+D.wtA_end={who:'aragorn',m:'stern',name:'Strider',text:"I shall scout the hill. Stay by the fire. Whatever you hear, *do not* leave the circle of light.",fx:()=>{flag('wtTalked');G.party=G.party.filter(k=>k!=='aragorn');hide_ara();objective('Rest by the campfire. Something does not feel right.',{x:24,y:17.5})}};
 function hide_ara(){flag('hide_aragorn')}
 async function wtAragorn(){if(F().wtTalked)return'wtA_gone';return'wtA1'}
 D.wtA_gone={who:'narrator',scene:'weathertop',text:"The Ranger has gone to scout. Only his footprints remain in the dew."};
