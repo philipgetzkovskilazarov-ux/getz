@@ -102,6 +102,7 @@ kbd{background:#0008;border:1px solid #8a7a50;border-radius:.2em;padding:0 .35em
     <div id="quest"><b>QUEST</b><span id="qtext"></span></div>
     <div id="ringbox"><canvas id="ringicon" width="20" height="20"></canvas><div><small>THE RING</small><div id="rbar"><i style="width:0%"></i></div></div></div>
     <div id="party"></div>
+    <button id="lvbtn" class="btn" style="position:absolute;right:1.2%;top:20%;pointer-events:auto;margin:0;font-size:.95em">☰ Levels (L)</button>
     <div id="prompt"></div>
     <div id="toasts"></div>
     <div id="hint"><kbd>WASD</kbd> move · <kbd>E</kbd> talk / use · <kbd>J</kbd> journal · <kbd>R</kbd> the Ring · <kbd>M</kbd> sound</div>
@@ -117,6 +118,7 @@ kbd{background:#0008;border:1px solid #8a7a50;border-radius:.2em;padding:0 .35em
   </div>
   <div id="panel" class="ov"><div class="panel" id="pbody"></div></div>
   <div id="journal" class="ov"><div class="panel" id="jbody"></div></div>
+  <div id="levels" class="ov"><div class="panel" id="lvbody"></div></div>
   <div id="fade"></div><div id="flash"></div>
   <div id="ending" class="ov"><div class="panel" id="ebody"></div></div>
   <div id="title" class="ov on">
@@ -125,7 +127,7 @@ kbd{background:#0008;border:1px solid #8a7a50;border-radius:.2em;padding:0 .35em
       <h3>A PIXEL ADVENTURE · BOOK ONE</h3>
       <h1>THE FELLOWSHIP<br>OF THE RING</h1>
       <h2>— a journey of eight lands —</h2>
-      <button class="btn" id="bnew">★ Begin the Journey</button><button class="btn alt hide" id="bcont">Continue</button>
+      <button class="btn" id="bnew">★ Begin the Journey</button><button class="btn alt hide" id="bcont">Continue</button><button class="btn alt" id="blv">Level select</button>
       <p>Carry the One Ring from the Shire to the River Anduin. Talk, choose, solve riddles — your words shape who stands beside you at the end.<br><i>A fan tribute. Not affiliated with or endorsed by any rights-holder; all art is generated in code.</i></p>
     </div>
   </div>

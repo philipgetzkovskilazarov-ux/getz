@@ -85,12 +85,14 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();
   if(mode==='dlg'){dlgKey(k);return}
   if(mode==='puzzle'){if(window.PZKey)window.PZKey(k);return}
   if(mode==='journal'){if(k==='escape'||k==='j'||k==='tab'){closeJournal()}return}
+  if(mode==='levels'){if(k==='escape'||k==='l')closeLevels();return}
   if(mode==='title'){if(k==='enter')$('bnew').click();return}
   if(k==='m'){muted=!muted;toast(muted?'Sound off':'Sound on');if(!muted)Music.cur&&(()=>{const c=Music.cur;Music.cur=null;Music.set(c)})()}
   if(mode!=='play')return;
   keys[k]=true;
   if(k==='e'||k==='enter'||k===' ')interact();
   else if(k==='j'||k==='escape'||k==='tab')openJournal();
+  else if(k==='l')openLevels();
   else if(k==='r')toggleRing();
 });
 addEventListener('keyup',e=>{delete keys[e.key.toLowerCase()]});
@@ -320,6 +322,31 @@ window.closeJournal=closeJournal;
 function ringLost(){flag('ringLost');runScript(async()=>{await say('ringLostEnd');endBook('ringlost')})}
 function endBook(kind){mode='end';Music.set('dark');const b=window.endingHTML(kind);$('ebody').innerHTML=b;$('ending').classList.add('on');$('again').onclick=()=>{try{localStorage.removeItem('fotr1')}catch(e){}location.reload()}}
 
+/* ================= level switcher ================= */
+const LEVELS=[
+ ['shire','I · The Shire (start)','shire',14,16,[]],
+ ['bree','II · Bree','bree',3,21,['started','gandalfIntro','partyDone','runesDone','sawRoad','readyToLeave','roadDone'],['sam','merry','pippin'],2],
+ ['wt','III · Weathertop','weathertop',4,26,['breeArrived','breeInnDone','breeDone','alias','letterRead'],['sam','merry','pippin'],3],
+ ['riv','IV · Rivendell (wake)','rivendell',3,22,['breeArrived','breeInnDone','breeDone','wtArrived','wtTalked','wtFight','wtDone'],['sam','merry','pippin','aragorn'],4],
+ ['council','IV · Rivendell — find Bilbo / Council','rivendell',30,27,['rivArrived','metBilbo','metLegolas','metGimli','metBoromir','councilReady','hasSting','hasMithril'],['sam','merry','pippin','aragorn'],4],
+ ['mgate','V · Gates of Moria','moriaGate',22,16,['rivArrived','metBilbo','metLegolas','metGimli','metBoromir','councilReady','councilDone','volunteered','fellowshipFormed','hasCloak','hasSting','hasMithril'],['sam','merry','pippin','gandalf','aragorn','legolas','gimli','boromir'],5],
+ ['moria','V · Khazad-dûm','moriaHall',28,46,['fellowshipFormed','hasCloak','hasSting','councilDone','mgArrived','doorOpen','watcherDone'],['sam','merry','pippin','gandalf','aragorn','legolas','gimli','boromir'],5],
+ ['lor','VI · Lothlórien','lorien',3,20,['fellowshipFormed','hasCloak','hasSting','councilDone','mgArrived','doorOpen','watcherDone','mhArrived','stairsDone','bridgeDone','gandalfFell'],['sam','merry','pippin','aragorn','legolas','gimli','boromir'],6],
+ ['amon','VII · Amon Hen','amonHen',3,18,['fellowshipFormed','hasCloak','hasSting','hasPhial','councilDone','gandalfFell','bridgeDone','lorArrived','galMet','mirrorDone','lorDone'],['sam','merry','pippin','aragorn','legolas','gimli','boromir'],7]];
+function jumpLevel(i){const L=LEVELS[i],g=newGame();g.map=L[2];g.px=L[3]*T;g.py=L[4]*T;g.flags.time='day';
+  if(i>0){g.flags.started=true;g.flags.hasRing=true;g.party=(L[6]||[]).slice();g.chapter=L[7]||1;if(i>=3)g.sprite='frodoCloak';g.stats.boromir=3;g.stats.sam=2;g.stats.aragorn=2;g.stats.gandalf=2}
+  (L[5]||[]).forEach(k=>g.flags[k]=true);
+  /* triggers of the target map should play its arrival scene, except for the "found Bilbo" jump */
+  if(L[0]==='council'||L[0]==='mgate'){for(const id in MAPS)(MAPS[id].triggers||[]).forEach(t=>{if(t.id!=='mgArrive')g.flags['trg_'+t.id]=true})}
+  if(L[0]==='council')g.objective='Speak with Bilbo (west side of the valley), then attend the Council.';
+  closeLevels();$('toasts').innerHTML='';scriptDepth=0;DL=null;$('dlg').classList.remove('on');$('panel').classList.remove('on');
+  if(g.flags.mgArrived!==undefined&&L[0]==='mgate')delete g.flags.mgArrived;
+  startGame(g).then(()=>{if(L[0]==='council')objective(g.objective,{npc:'bilbo'})})}
+function openLevels(){G&&(G._lprev=mode);$('lvbody').innerHTML='<h2>🗺 LEVEL SWITCHER</h2><div class="note">Jump to any chapter. Your story state is set up as if you had played up to that point.</div>'+LEVELS.map((l,i)=>`<button class="btn${i%2?' alt':''}" style="display:block;width:100%;text-align:left" data-i="${i}">${l[1]}</button>`).join('')+'<button class="btn alt" id="lvclose">Close (L)</button>';
+  $('lvbody').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>jumpLevel(+b.dataset.i));$('lvclose').onclick=closeLevels;
+  window.__lvprev=mode;mode='levels';$('levels').classList.add('on')}
+function closeLevels(){$('levels').classList.remove('on');if(mode==='levels')mode=window.__lvprev==='title'?'title':'play'}
+window.openLevels=openLevels;
 /* ================= save / load ================= */
 function save(){try{const s=JSON.parse(JSON.stringify(G));localStorage.setItem('fotr1',JSON.stringify(s))}catch(e){}}
 function loadSave(){try{const s=localStorage.getItem('fotr1');return s?JSON.parse(s):null}catch(e){return null}}
@@ -336,7 +363,7 @@ function fit(){const w=$('wrap').clientWidth;$('wrap').style.setProperty('--fs',
 addEventListener('resize',fit);fit();
 
 /* ================= start ================= */
-async function startGame(state){G=state;await sleep(10);$('title').classList.remove('on');
+async function startGame(state){G=state;await sleep(10);mode='busy';$('title').classList.remove('on');
   setFade(1);M=loadMap(G.map);M.npcs=null;M.extra=[];resetTrail();CAM.x=U.clamp(G.px-VW/2,0,Math.max(0,M.W-VW));CAM.y=U.clamp(G.py-VH/2,0,Math.max(0,M.H-VH));initWeather();
   mode='busy';Music.set(M.def.music);objective(G.objective);
   await sleep(300);setFade(0);showLoc(M.def.name);mode='play';
