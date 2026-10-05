@@ -107,6 +107,7 @@ MAPS.bree={id:'bree',name:'Bree',w:60,h:44,seed:11,scene:'bree',music:'bree',wea
   {id:'breeB',wander:22,spr:'breeB',por:'harry',name:'Merchant',x:23.5,y:27.4,dir:'down',talk:()=>'breeB',show:()=>true},
   {id:'breeC',wander:22,spr:'breeC',por:'harry',name:'Horse-trader',x:36,y:20.6,dir:'left',talk:()=>'breeC',show:()=>true},
   {id:'breeD',wander:22,spr:'breeD',por:'butterbur',name:'Villager',x:37.4,y:27.6,dir:'down',talk:()=>'breeD',show:()=>true},
+  {id:'ch1',critter:'chicken',v:1,wander:30,x:14,y:26.4,solid:false},{id:'ch2',critter:'chicken',v:0,wander:30,x:46,y:25.8,solid:false},{id:'ct1',critter:'cat',v:1,wander:30,x:24.4,y:18.4,solid:false},{id:'ct2',critter:'cat',v:0,wander:30,x:44,y:19,solid:false},{id:'dg1',critter:'dog',v:0,wander:40,x:38.6,y:21.6,solid:false},
   {id:'strider',spr:'aragorn',por:'aragorn',name:'Strider',x:34,y:22.6,dir:'left',talk:()=>breeStrider(),show:()=>!!F().striderOutside&&!G.party.includes('aragorn')}],
  exits:[{x:0,y:19,w:1.5,h:5,to:'shire',tx:61,ty:23,if:()=>false,msg:"The road back to the Shire... but there is no turning back now."},
         {x:58.5,y:19,w:1.5,h:5,to:'weathertop',tx:4,ty:26,if:()=>!!F().breeDone,msg:"You should not leave Bree before Strider has spoken with you."}],

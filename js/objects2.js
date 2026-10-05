@@ -26,7 +26,7 @@ OB.house=(o={})=>{const W=o.w||96,fl=o.floors||2,wallH=fl*30,roofH=o.roofH||34,H
   if(o.sign){const sx=ox+W-6,sy=wy+22;c.vline(sx+8,sy-6,3,'#2a1a10');c.hline(sx-2,sy-6,12,'#2a1a10');c.rect(sx-2,sy-3,13,12,RP('#d8b060',5)[2]);c.rect(sx-2,sy-3,13,1,'#2a1a10');c.rect(sx-2,sy+8,13,1,'#2a1a10');
     if(o.sign==='pony'){c.shade(sx+4,sy+3,3,2,RP('#f4f0e0',4),{dither:0});c.rect(sx+6,sy,2,2,'#f4f0e0');c.px(sx+7,sy-1,'#f4f0e0');c.vline(sx+1,sy+4,4,'#f4f0e0');c.vline(sx+6,sy+4,3,'#f4f0e0')}else{c.rect(sx+3,sy+1,5,6,RP('#c8a040',4)[2])}}
   const lights=[];for(let f=0;f<fl;f++)for(let k=0;k<per;k++)lights.push({x:-W/2+8+Math.round(k*(W-16)/per)+(per>1?4:Math.round(W*.5-6)-8)+5,y:-(H-wy-8-f*30-6),r:34,col:'#ffb84a',flicker:.05});
-  return done(c,{ax:ox+W/2,ay:H-2,solid:[-W/2,-30,W,30],lights:lights.slice(0,6),doorX:-(W/2)+Math.round(W*.22)+3})};
+  return done(c,{ax:ox+W/2,ay:H-2,solid:[-W/2,-30,W,30],lights:lights.slice(0,6),emit:o.chimney===false?[]:[{x:Math.round(W*.72)+5-W/2,y:4-(H-2)}],doorX:-(W/2)+Math.round(W*.22)+3})};
 OB.pony=()=>OB.house({w:170,floors:3,roof:'#5a3a2a',wall:'#d8c090',beam:'#2a1a10',roofH:40,seed:9,sign:'pony',glow:'#ffd070',shut:'#7a2a2a',box:true,door:'#4a2a14'});
 OB.stall=(o={})=>{const W=48,H=50,c=new Cv(W,H),cs=o.cols||['#c0392b','#f4f0e0'];gshadow(c,W/2+2,H-3,20,3,.3);
   [4,W-6].forEach(x=>c.rect(x,14,3,H-18,RP('#7a5230',4)[2]));

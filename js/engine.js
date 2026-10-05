@@ -39,7 +39,7 @@ const THEMES={
  lorien:{root:67,scale:[0,2,4,7,9],tempo:.65,lead:'sine',pad:1,density:.45,oct:2},
  amon:{root:60,scale:[0,2,3,5,7,8,10],tempo:.6,lead:'triangle',pad:1,density:.4,oct:1}};
 const Music={cur:null,timer:null,step:0,
-  set(name){if(this.cur===name)return;this.cur=name;clearInterval(this.timer);const th=THEMES[name];if(!th||!ac())return;this.step=0;let last=2;const mf=n=>440*Math.pow(2,(n-69)/12);
+  set(name){if(this.cur===name)return;const th=THEMES[name];if(!th||!ac())return;this.cur=name;clearInterval(this.timer);this.step=0;let last=2;const mf=n=>440*Math.pow(2,(n-69)/12);
     const tick=()=>{if(muted||!AC||mode==='title'&&false)return;const s=this.step++,beat=th.tempo;
       if(th.pad&&s%8===0){const root=th.root-12;[0,7,th.scale[2]].forEach((o,i)=>tone(mf(root+o),beat*8.5,'sine',.014,i*.05))}
       if(th.drum&&s%4===0)tone(52,.5,'sine',.07);if(th.drum&&s%8===6)tone(46,.4,'sine',.05);
@@ -171,9 +171,11 @@ function setTime(t){flag('time',t)}
 async function transition(fn){setFade(1);await sleep(750);await fn();await sleep(150);setFade(0);await sleep(650)}
 /* ================= weather / particles ================= */
 let WX=[];const FOG=(()=>{const c=new U.Cv(256,96);for(let y=0;y<96;y++)for(let x=0;x<256;x++){const n=U.fbm(x/36,y/20,5,3),a=Math.max(0,n-.42)*1.6*(1-Math.abs(y-48)/52);if(a>0)c.px(x,y,[255,255,255],Math.min(.55,a))}return c.canvas()})();
-function initWeather(){WX=[];const k=M.def.weather;const n=k==='petal'||k==='leaf'?34:k==='dust'?60:k==='ember'?30:0;for(let i=0;i<n;i++)WX.push({x:Math.random()*VW,y:Math.random()*VH,p:Math.random()*6,s:.5+Math.random()})}
-function drawWeather(t,dt){const k=M.def.weather;if(!k)return;
-  if(k==='petal'||k==='leaf'){const cols=k==='petal'?['#ffb0c8','#fff','#ffe27a']:M.def.id==='lorien'?['#ffe27a','#ffd040','#fff0a0']:['#e0742a','#e8a030','#c8501a'];
+function weatherKind(){const k=M.def.weather;return (M.def.id==='shire'&&G.flags.time!=='day')||M.def.id==='bree'?(M.def.id==='bree'?'mist':'firefly'):k}
+function initWeather(){WX=[];const k=M.def.weather;const n=k==='petal'||k==='leaf'?34:k==='dust'?60:k==='ember'?30:0;for(let i=0;i<46;i++)WX.push({x:Math.random()*VW,y:Math.random()*VH,p:Math.random()*6,s:.5+Math.random(),ff:1});for(let i=0;i<n;i++)WX.push({x:Math.random()*VW,y:Math.random()*VH,p:Math.random()*6,s:.5+Math.random()})}
+function drawWeather(t,dt){const k=weatherKind();if(!k)return;
+  if(k==='firefly'){ctx.globalCompositeOperation='lighter';for(const p of WX){if(!p.ff)continue;p.x+=Math.sin(t*.6+p.p)*10*dt;p.y+=Math.cos(t*.5+p.p*1.3)*8*dt;if(p.x<0)p.x=VW;if(p.x>VW)p.x=0;if(p.y<0)p.y=VH;if(p.y>VH)p.y=0;const a=Math.max(0,Math.sin(t*2.2+p.p*3));ctx.globalAlpha=a*.9;ctx.fillStyle='#e8ff7a';ctx.fillRect(p.x|0,p.y|0,2,2);ctx.globalAlpha=a*.25;ctx.fillRect((p.x-1)|0,(p.y-1)|0,4,4)}ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';return}
+  if(k==='petal'||k==='leaf'){for(const p of WX){}const cols=k==='petal'?['#ffb0c8','#fff','#ffe27a']:M.def.id==='lorien'?['#ffe27a','#ffd040','#fff0a0']:['#e0742a','#e8a030','#c8501a'];
     for(const p of WX){p.x+=(12+Math.sin(t*1.3+p.p)*10)*dt*p.s;p.y+=(10+p.s*8)*dt;if(p.y>VH+4){p.y=-4;p.x=Math.random()*VW}if(p.x>VW+4)p.x=-4;ctx.fillStyle=cols[(p.p*3|0)%3];ctx.fillRect(p.x|0,p.y|0,2,1);ctx.fillRect((p.x+1)|0,(p.y+1)|0,1,1)}}
   if(k==='dust'){ctx.globalCompositeOperation='lighter';for(const p of WX){p.x+=Math.sin(t*.4+p.p)*3*dt;p.y+=Math.cos(t*.3+p.p)*2*dt-1*dt;if(p.y<0)p.y=VH;if(p.x<0)p.x=VW;if(p.x>VW)p.x=0;ctx.fillStyle=`rgba(160,190,255,${.18+.15*Math.sin(t*2+p.p)})`;ctx.fillRect(p.x|0,p.y|0,1,1)}ctx.globalCompositeOperation='source-over'}
   if(k==='ember'){ctx.globalCompositeOperation='lighter';for(const p of WX){p.y-=(10+p.s*14)*dt;p.x+=Math.sin(t+p.p)*6*dt;if(p.y<0){p.y=VH;p.x=Math.random()*VW}ctx.fillStyle=`rgba(255,${120+p.s*60|0},30,.7)`;ctx.fillRect(p.x|0,p.y|0,1,1)}ctx.globalCompositeOperation='source-over'}
@@ -222,7 +224,7 @@ function drawMarker(t){const p=targetPos();if(!p||mode!=='play')return;const sx=
   else{const cx=VW/2,cy=VH/2,a=Math.atan2(sy-cy,sx-cx),r=Math.min((VW/2-18)/Math.abs(Math.cos(a)||.001),(VH/2-18)/Math.abs(Math.sin(a)||.001)),ax=cx+Math.cos(a)*r,ay=cy+Math.sin(a)*r;
     ctx.save();ctx.translate(ax,ay);ctx.rotate(a);ctx.fillStyle='#000a';ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-6,-8);ctx.lineTo(-6,8);ctx.fill();ctx.fillStyle='#ffd070';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-4,-6);ctx.lineTo(-4,6);ctx.fill();ctx.restore()}}
 function shadow(x,y){ctx.fillStyle='rgba(20,10,50,.32)';ctx.beginPath();ctx.ellipse(Math.round(x),Math.round(y),6,2.4,0,0,7);ctx.fill()}
-function drawNpc(n,sx,sy,t){const sp=n.spr==='_none'?null:n.spr;if(n.draw){n.draw(ctx,sx,sy,t);return}if(!sp)return;
+function drawNpc(n,sx,sy,t){if(n.critter){drawCritter(ctx,n,sx,sy,t);return}const sp=n.spr==='_none'?null:n.spr;if(n.draw){n.draw(ctx,sx,sy,t);return}if(!sp)return;
   if(n.dog)return;let d=n.face;const dist=Math.hypot(n.x-G.px,n.y-G.py);if(!n.moving&&dist<54&&n.lookAt!==false){const dx=G.px-n.x,dy=G.py-n.y;d=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up')}
   const s=sprites(sp),bob=n.moving?0:(Math.sin(t*2+n.ph)>.72?-1:0),fr=n.moving?1+Math.floor((n.walkT||0))%2:0;shadow(sx,sy);if(n.alpha)ctx.globalAlpha=n.alpha;ctx.drawImage(s[d][fr],Math.round(sx-12),Math.round(sy-31+bob));ctx.globalAlpha=1;
   if(n.talk&&dist<40&&mode==='play'){ctx.fillStyle='#ffd070';ctx.fillRect(Math.round(sx)-1,Math.round(sy-38+Math.sin(t*5)),3,1);ctx.fillRect(Math.round(sx),Math.round(sy-37+Math.sin(t*5)),1,1)}}

@@ -133,6 +133,23 @@ function horseSprite(col='#5a3a22'){const c=new Cv(40,30),R=U.ramp(col,5,.28),m=
   c.rect(15,10,9,2,'#8a2a2a');c.outline(.28);return c.canvas()}
 function boatSprite(){const c=new Cv(44,22),w=U.ramp('#8a5a30',5);c.region(2,8,42,20,(x,y)=>{const t=(x-2)/40,depth=11*Math.sin(Math.PI*Math.min(1,t*1.04))*.9+1;return y>=8+(20-8-depth)*.0&&y<=8+Math.min(11,depth)},(x,y)=>w[U.clamp(Math.round(2.5+(y-8)/-5+(x<20?.4:-.2)+(U.bayer(x,y)-.5)*.5),0,4)]);
   c.hline(3,8,38,w[4]);for(let i=6;i<40;i+=4)c.vline(i,9,8,w[0],.5);c.vline(20,0,9,'#6a4a2a');c.poly([[21,1],[34,6],[21,8]],'#e8e0cc');c.outline(.3);return c.canvas()}
+
+/* ---------- critters: chickens, cats, dogs (tiny wandering NPCs) ---------- */
+const CRIT={};
+function critSprite(kind,v,frame){const c=new Cv(18,14),R=U.ramp;
+  if(kind==='chicken'){const body=R(v?'#e8c898':'#f4f0e8',5,.2),comb=R('#d83a2a',3);const bob=frame?1:0;
+    c.shade(8,8+bob*0,4.6,3.6,body,{light:[-.5,-.7,.5]});c.poly([[3,6],[0,3],[2,8]],body[3]);c.poly([[3,7],[-0,5+0],[3,9]],body[2]);
+    c.shade(12,4+bob,2.6,2.8,body,{light:[-.5,-.7,.5],dither:.2});c.px(13,1+bob,comb[2]);c.px(12,1+bob,comb[1]);c.px(14,5+bob,'#e8a020');c.px(13,4+bob,'#1a1010');c.px(12,6+bob,comb[2]);
+    c.px(7,11,'#e8a020');c.px(9,11-(frame?1:0),'#e8a020');c.px(7,12,'#e8a020');c.px(9,12,'#e8a020');c.px(6,12,'#e8a020');c.px(10,12,'#e8a020');
+  }else if(kind==='cat'){const body=R(v?'#2a2a32':'#e08a30',5,.24);
+    c.shade(8,8,5.4,3.6,body,{light:[-.5,-.7,.5]});c.shade(13,5,3,2.8,body,{light:[-.5,-.7,.5],dither:.2});c.poly([[11,3],[11,0],[13,2]],body[2]);c.poly([[14,3],[15,0],[16,3]],body[2]);c.px(13,5,'#a8e060');c.px(15,5,'#a8e060');c.px(14,7,'#e88a9a');
+    for(let i=0;i<4;i++)c.px(5+i*2,5,body[v?3:0]);c.line(3,8,0,5+(frame?1:0),body[2]);c.line(3,9,0,6+(frame?1:0),body[1]);c.rect(5,11,2,2,body[1]);c.rect(10,11,2,2,body[2]);
+  }else{const body=R('#9a6a3a',5,.26);c.shade(8,7,6,3.6,body,{light:[-.5,-.7,.5]});c.shade(14,5,3.4,3,body,{light:[-.5,-.7,.5],dither:.2});c.poly([[12,2],[11,5],[13,4]],R('#4a2a14',4)[1]);c.px(15,4,'#111');c.px(17,6,'#111');c.shade(12,8,2,1.5,R('#f2e4cf',4),{dither:0});
+    c.line(2,5,0,2+(frame?2:0),body[2]);c.rect(4,10,2,3,body[1]);c.rect(7+(frame?1:0),10,2,3,body[2]);c.rect(11,10,2,3,body[1]);}
+  c.outline(.3);return c.canvas()}
+function critter(kind,v){const k=kind+v;return CRIT[k]||(CRIT[k]=[0,1].map(f=>{const a=critSprite(kind,v,f);const b=U.canvas(a.width,a.height),x=b.getContext('2d');x.translate(a.width,0);x.scale(-1,1);x.drawImage(a,0,0);return{r:a,l:b}}))}
+function drawCritter(ctx,n,sx,sy,t){const fr=critter(n.critter,n.v||0)[n.moving?Math.floor((n.walkT||0))%2:0];const im=n.face==='left'?fr.l:fr.r;ctx.fillStyle='rgba(20,10,50,.28)';ctx.beginPath();ctx.ellipse(Math.round(sx),Math.round(sy),5,1.8,0,0,7);ctx.fill();ctx.drawImage(im,Math.round(sx-9),Math.round(sy-13+(n.moving?0:(Math.sin(t*3+n.ph)>.9?1:0))))}
+window.drawCritter=drawCritter;
 window.SPEC=SPEC;window.sprites=sprites;window.horseSprite=horseSprite;window.boatSprite=boatSprite;
 
 })();
